@@ -17,6 +17,7 @@
     "lit": "^3.1.2"
   },
   "devDependencies": {
+    "block-clock": "file:",
     "typescript": "^5.2.2",
     "vite": "^5.2.0",
     "vite-plugin-dts": "^3.9.1"

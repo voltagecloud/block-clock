@@ -34,30 +34,11 @@ export class Blockclock extends LitElement {
   @property({ type: Number })
   fill = 360;
 
-  private calculateDashArray(f: number) {
-    const circumference = Math.PI * (50 * 2);
-    const progress = (f / 360) * circumference;
-    const remaining = circumference - progress;
-    return `${progress}px ${remaining}px`;
-  }
-
   render() {
     return html`
       <div class="square">
         <div class="circle">
-          <svg class="ring" viewBox="0 0 100 100">
-            <circle
-              cx="50"
-              cy="50"
-              r=${50 - this.ringWidth / 2}
-              stroke="blue"
-              stroke-width=${this.ringWidth}
-              fill="none"
-              style="stroke-dasharray: ${this.calculateDashArray(
-                this.fill
-              )}; stroke-width: ${this.ringWidth};"
-            />
-          </svg>
+          <my-ring fill="${this.fill}"></my-ring>
           <span class="text">hello</span>
         </div>
       </div>
@@ -66,10 +47,13 @@ export class Blockclock extends LitElement {
 
   static styles = css`
     :host {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 2rem;
-      text-align: center;
+      font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+      font-weight: 400;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      color: red;
     }
 
     div.square {
@@ -91,16 +75,6 @@ export class Blockclock extends LitElement {
       border-radius: 50%;
       aspect-ratio: 1/1;
       container-type: inline-size;
-    }
-
-    .ring {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
-      z-index: 1;
-      transform: rotate(-90deg); /* Start fill from the top */
     }
 
     .text {
