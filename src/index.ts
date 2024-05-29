@@ -1,4 +1,5 @@
 import { LitElement, css, html } from "lit";
+
 import { customElement, property } from "lit/decorators.js";
 import "./my-ring.ts";
 
@@ -10,35 +11,37 @@ import "./my-ring.ts";
  */
 @customElement("block-clock")
 export class Blockclock extends LitElement {
+  static shadowRootOptions: ShadowRootInit = {
+    ...LitElement.shadowRootOptions,
+    delegatesFocus: true,
+    mode: "closed",
+  };
   /**
    * Copy for the read the docs hint.
    */
-  @property()
-  docsHint = "Click on the Vite and Lit logos to learn more";
-
-  /**
-   * The number of times the button has been clicked.
-   */
-  @property({ type: Number })
-  count = 0;
+  // @property()
+  // docsHint = "Click on the Vite and Lit logos to learn more";
 
   /**
    * True if dark mode is active.
    */
-  @property({ type: Boolean })
-  darkMode = true;
+  // @property({ type: Boolean })
+  // darkMode = true;
 
   @property({ type: Number })
   ringWidth = 2;
 
   @property({ type: Number })
-  fill = 180;
+  syncProgress = 10;
 
   render() {
     return html`
       <div class="square">
         <div class="circle">
-          <my-ring fill="${this.fill}" ringWidth="${this.ringWidth}"></my-ring>
+          <my-ring
+            ringFillAngle="${this.syncProgress * 3.6}"
+            ringWidth="${this.ringWidth}"
+          ></my-ring>
           <div class="content">
             <div class="bitcoin-logo">
               <svg
@@ -72,6 +75,7 @@ export class Blockclock extends LitElement {
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       color: white;
+      text-align: left;
     }
 
     div.square {

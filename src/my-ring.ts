@@ -5,7 +5,7 @@ import "./my-ring-track.ts";
 @customElement("my-ring")
 export class Ring extends LitElement {
   @property({ type: Number })
-  fill = 0;
+  ringFillAngle = 0;
 
   @property({ type: Number })
   ringWidth = 2;
@@ -29,6 +29,7 @@ export class Ring extends LitElement {
           </linearGradient>
         </defs>
         <path
+          class="animated"
           d="
             M 50,
             50 m -${50 - this.ringWidth / 2},
@@ -43,7 +44,7 @@ export class Ring extends LitElement {
           fill="none"
           stroke-linecap="round"
           style="stroke-dasharray: ${this.calculateDashArray(
-            this.fill
+            this.ringFillAngle
           )}; stroke-width: ${this.ringWidth};"
         />
       </svg>
@@ -51,6 +52,9 @@ export class Ring extends LitElement {
   }
 
   static styles = css`
+    .animated {
+      transition: stroke-dasharray 1s ease-in-out;
+    }
     .ring {
       position: absolute;
       width: 100%;
@@ -59,7 +63,6 @@ export class Ring extends LitElement {
       left: 0;
       z-index: 1;
       transform: rotate(90deg); /* Start fill from the top */
-      transition: stroke-dasharray 2s ease-in-out;
     }
   `;
 }
