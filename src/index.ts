@@ -38,7 +38,7 @@ export class Blockclock extends LitElement {
     return html`
       <div class="square">
         <div class="circle">
-          <my-ring fill="${this.fill}"></my-ring>
+          <my-ring></my-ring>
           <span class="text">hello</span>
         </div>
       </div>
@@ -53,13 +53,12 @@ export class Blockclock extends LitElement {
       text-rendering: optimizeLegibility;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-      color: red;
+      color: white;
     }
 
     div.square {
       height: 200px;
       width: 200px;
-      background-color: red;
       resize: both;
       display: block;
       overflow: hidden;
@@ -70,9 +69,10 @@ export class Blockclock extends LitElement {
       justify-content: center;
       align-items: center;
       position: relative;
-      background-color: green;
+      background-color: black;
       max-height: 100%;
       border-radius: 50%;
+      border: 1px solid black;
       aspect-ratio: 1/1;
       container-type: inline-size;
     }

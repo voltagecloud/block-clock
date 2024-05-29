@@ -4,10 +4,10 @@ import { customElement, property } from "lit/decorators.js";
 @customElement("my-ring")
 export class Ring extends LitElement {
   @property({ type: Number })
-  fill = 360;
+  fill = 180;
 
   @property({ type: Number })
-  ringWidth = 4;
+  ringWidth = 2;
 
   private calculateDashArray(f: number) {
     const circumference = Math.PI * (50 * 2);
@@ -30,7 +30,7 @@ export class Ring extends LitElement {
           cx="50"
           cy="50"
           r=${50 - this.ringWidth / 2}
-          stroke="url(#gradient)"
+          stroke="yellow"
           stroke-width=${this.ringWidth}
           fill="none"
           style="stroke-dasharray: ${this.calculateDashArray(
