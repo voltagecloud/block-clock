@@ -29,7 +29,7 @@ export class Blockclock extends LitElement {
 
   render() {
     return html` <div class="square">
-      <div class="circle"></div>
+      <div class="circle"><span class="text">hello</span></div>
     </div>`;
   }
 
@@ -55,11 +55,22 @@ export class Blockclock extends LitElement {
     }
 
     div.circle {
+      display: flex;
+      justify-content: center;
+      align-items: center;
       background-color: green;
       max-height: 100%;
       border-radius: 50%;
       aspect-ratio: 1/1;
+      container-type: inline-size;
     }
+
+    @container (min-width: 0px) {
+      .text {
+        font-size: 10cqi;
+      }
+    }
+
     /* .logo {
       height: 6em;
       padding: 1.5em;
