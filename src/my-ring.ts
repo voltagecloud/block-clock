@@ -1,10 +1,11 @@
 import { LitElement, css, html } from "lit";
 import { customElement, property } from "lit/decorators.js";
+import "./my-ring-track.ts";
 
 @customElement("my-ring")
 export class Ring extends LitElement {
   @property({ type: Number })
-  fill = 180;
+  fill = 0;
 
   @property({ type: Number })
   ringWidth = 2;
@@ -18,6 +19,7 @@ export class Ring extends LitElement {
 
   render() {
     return html`
+      <my-ring-track ringWidth="${this.ringWidth}"></my-ring-track>
       <svg class="ring" viewBox="0 0 100 100">
         <defs>
           <!-- TODO Move around the gradient -->
@@ -26,13 +28,20 @@ export class Ring extends LitElement {
             <stop offset="100%" style="stop-color: blue; stop-opacity: 1" />
           </linearGradient>
         </defs>
-        <circle
-          cx="50"
-          cy="50"
-          r=${50 - this.ringWidth / 2}
+        <path
+          d="
+            M 50,
+            50 m -${50 - this.ringWidth / 2},
+            0 a ${50 - this.ringWidth / 2},
+            ${50 - this.ringWidth / 2} 0 1,
+            1 ${2 * (50 - this.ringWidth / 2)},
+            0 a ${50 - this.ringWidth / 2},
+            ${50 - this.ringWidth / 2} 0 1,1 -${2 * (50 - this.ringWidth / 2)},
+            0"
           stroke="yellow"
-          stroke-width=${this.ringWidth}
+          stroke-width="${this.ringWidth}"
           fill="none"
+          stroke-linecap="round"
           style="stroke-dasharray: ${this.calculateDashArray(
             this.fill
           )}; stroke-width: ${this.ringWidth};"
@@ -49,7 +58,8 @@ export class Ring extends LitElement {
       top: 0;
       left: 0;
       z-index: 1;
-      transform: rotate(-90deg); /* Start fill from the top */
+      transform: rotate(90deg); /* Start fill from the top */
+      transition: stroke-dasharray 2s ease-in-out;
     }
   `;
 }
