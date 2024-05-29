@@ -23,6 +23,12 @@ export class Blockclock extends LitElement {
   @property({ type: Number })
   count = 0;
 
+  /**
+   * True if dark mode is active.
+   */
+  @property({ type: Boolean })
+  darkMode = true;
+
   render() {
     return html`
       <div>
@@ -32,6 +38,7 @@ export class Blockclock extends LitElement {
         <a href="https://lit.dev" target="_blank">
           <img src=${litLogo} class="logo lit" alt="Lit logo" />
         </a>
+        <p>hello hello</p>
       </div>
       <slot></slot>
       <div class="card">
