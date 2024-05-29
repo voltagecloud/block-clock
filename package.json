@@ -1,8 +1,12 @@
 {
   "name": "block-clock",
+  "version": "0.0.1",
   "main": "dist/index.js",
   "module": "dist/index.js",
-  "version": "0.0.0",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*"
+  ],
   "type": "module",
   "scripts": {
     "dev": "vite",
