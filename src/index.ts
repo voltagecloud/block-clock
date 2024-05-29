@@ -1,5 +1,6 @@
 import { LitElement, css, html } from "lit";
 import { customElement, property } from "lit/decorators.js";
+import "./my-ring.ts";
 
 /**
  * An example element.
@@ -27,15 +28,41 @@ export class Blockclock extends LitElement {
   @property({ type: Boolean })
   darkMode = true;
 
-  render() {
-    return html` <div class="square">
-      <div class="circle"><span class="text">hello</span></div>
-    </div>`;
+  @property({ type: Number })
+  ringWidth = 4;
+
+  @property({ type: Number })
+  fill = 360;
+
+  private calculateDashArray(f: number) {
+    const circumference = Math.PI * (50 * 2);
+    const progress = (f / 360) * circumference;
+    const remaining = circumference - progress;
+    return `${progress}px ${remaining}px`;
   }
 
-  // private _onClick() {
-  //   this.count++;
-  // }
+  render() {
+    return html`
+      <div class="square">
+        <div class="circle">
+          <svg class="ring" viewBox="0 0 100 100">
+            <circle
+              cx="50"
+              cy="50"
+              r=${50 - this.ringWidth / 2}
+              stroke="blue"
+              stroke-width=${this.ringWidth}
+              fill="none"
+              style="stroke-dasharray: ${this.calculateDashArray(
+                this.fill
+              )}; stroke-width: ${this.ringWidth};"
+            />
+          </svg>
+          <span class="text">hello</span>
+        </div>
+      </div>
+    `;
+  }
 
   static styles = css`
     :host {
@@ -58,6 +85,7 @@ export class Blockclock extends LitElement {
       display: flex;
       justify-content: center;
       align-items: center;
+      position: relative;
       background-color: green;
       max-height: 100%;
       border-radius: 50%;
@@ -65,23 +93,26 @@ export class Blockclock extends LitElement {
       container-type: inline-size;
     }
 
+    .ring {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: 1;
+      transform: rotate(-90deg); /* Start fill from the top */
+    }
+
+    .text {
+      position: relative;
+      z-index: 2;
+    }
+
     @container (min-width: 0px) {
       .text {
         font-size: 10cqi;
       }
     }
-
-    /* .logo {
-      height: 6em;
-      padding: 1.5em;
-      will-change: filter;
-      transition: filter 300ms;
-    } */
-
-    /* ::slotted(h1) {
-      font-size: 3.2em;
-      line-height: 1.1;
-    } */
 
     @media (prefers-color-scheme: light) {
       a:hover {
