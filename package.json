@@ -1,11 +1,12 @@
 {
-  "name": "blockclock",
-  "private": true,
+  "name": "block-clock",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc --declaration && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -13,6 +14,7 @@
   },
   "devDependencies": {
     "typescript": "^5.2.2",
-    "vite": "^5.2.0"
+    "vite": "^5.2.0",
+    "vite-plugin-dts": "^3.9.1"
   }
 }
