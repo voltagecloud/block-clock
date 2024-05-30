@@ -5,13 +5,12 @@ import { styleMap } from "lit/directives/style-map.js";
 export interface RingProps {
   ringWidth: number;
   ringFillAngle: number;
-  segments: number[];
 }
 
-export const Ring = ({ ringFillAngle = 0, ringWidth, segments }: RingProps) => {
+export const Ring = ({ ringFillAngle = 0, ringWidth }: RingProps) => {
   const animatedStyle = {
     transition: "stroke-dasharray 1s ease-in-out",
-    "stroke-dasharray": calculateDashArray(ringFillAngle, segments),
+    "stroke-dasharray": calculateDashArray(ringFillAngle),
     "stroke-width": ringWidth,
   };
 
@@ -43,56 +42,11 @@ export const Ring = ({ ringFillAngle = 0, ringWidth, segments }: RingProps) => {
     </svg>
   `;
 };
-
-function normalize(data: number[]) {
-  const max = Math.max(...data);
-  const min = Math.min(...data);
-  const normal = data.map((value) => (value - min) / (max - min));
-  normal.shift();
-  return normal;
-}
-
-function differences(data: number[]) {
-  let diffs = data.map((value, i) => (i > 0 ? value - data[i - 1] : value));
-  // Remove the first element because it is only used for comparison
-  diffs[0] = 0;
-  return diffs;
-}
-
-function getScaleCoefficientToFill(data: number[], filled: number) {
-  return filled / data.reduce((acc, val) => acc + val, 0);
-}
-
-function calculateDashArray(progress: number, segments: number[], gap = 2) {
+function calculateDashArray(f: number) {
   const circumference = Math.PI * (50 * 2);
-  // If no progres, no dasharray needs to be calculated
-  if (progress <= 0) {
-    return `0px ${circumference}`;
-  }
-  const filled = (progress / 360) * circumference;
-  const diffs = differences(segments);
-  const normalized = normalize(diffs);
-  const coef = getScaleCoefficientToFill(normalized, filled);
-  const proportional = normalized.map((seg) => seg * coef);
-  const proportionalSum = proportional.reduce((acc, val) => acc + val, 0);
-  const dashes = proportional.map((dash) => `${dash}px ${gap}px`).join(" ");
+  const filled = (f / 100) * circumference;
   const remaining = circumference - filled;
-  // const dasharray = `${dashes} 0px ${remaining}px`;
-  const dasharray = `${dashes} 0px ${remaining}px`;
-  console.log({
-    dashes,
-    filled,
-    remaining,
-    normalized,
-    proportional,
-    dasharray,
-    diffs,
-    coef,
-    proportionalSum,
-    circumference,
-  });
-
-  return dasharray;
+  return `${filled}px ${remaining}px`;
 }
 
 const ringStyle = {
