@@ -1,22 +1,42 @@
 import { html } from "lit";
 import { Ring } from "./Ring";
+import { RingSegments } from "./RingSegments";
 
 export interface BlockClockProps {
   ringWidth: number;
   syncProgress: number;
   blockHeight: number;
+  blockTimes: number[];
+  syncing: boolean;
+  connected: boolean;
 }
 
 export const BlockClock = ({
   ringWidth = 2,
   syncProgress = 0,
   blockHeight = 0,
+  blockTimes = [],
+  syncing = false,
+  connected = false,
 }: BlockClockProps) => {
   const commaDelimitedBlockHeight = numberWithCommas(blockHeight);
+  console.log({ syncing, connected });
   return html`
     <div class="square">
       <div class="circle">
-        ${Ring({ ringFillAngle: syncProgress * 3.6, ringWidth })}
+        ${
+          // !syncing && connected
+          // ? RingSegments({
+          //     ringFillAngle: syncProgress * 3.6, // 3.6 = 360 / 100
+          //     ringWidth,
+          //     segments: blockTimes,
+          //   })
+          // :
+          Ring({
+            ringFillAngle: syncProgress * 3.6, // 3.6 = 360 / 100
+            ringWidth,
+          })
+        }
         <div class="content">
           <div class="bitcoin-logo">
             <svg

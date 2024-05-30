@@ -11,6 +11,40 @@ const meta = {
       ringWidth: args.ringWidth,
       syncProgress: args.syncProgress,
       blockHeight: args.blockHeight,
+      blockTimes: args.blockTimes,
+      syncing: false,
+      connected: false,
+    }),
+  argTypes: {
+    ringWidth: { control: { type: "range", min: 0, max: 8 } },
+    syncProgress: { control: { type: "range", min: 0, max: 100 } },
+    blockHeight: { control: { type: "range", min: 0, max: 1_000_000 } },
+    syncing: { control: { type: "boolean" } },
+    connected: { control: { type: "boolean" } },
+    // size: {
+    //   control: { type: "select" },
+    //   options: ["small", "medium", "large"],
+    // },
+  },
+  args: {
+    // onClick: fn()
+  },
+} satisfies Meta<BlockClockProps>;
+
+export default meta;
+type Story = StoryObj<ButtonProps>;
+
+export const BlockClockSynced = {
+  title: "Synced Block Clock",
+  tags: ["autodocs"],
+  render: (args) =>
+    BlockClock({
+      ringWidth: args.ringWidth,
+      syncProgress: args.syncProgress,
+      blockHeight: args.blockHeight,
+      blockTimes: args.blockTimes,
+      syncing: false,
+      connected: true,
     }),
   argTypes: {
     ringWidth: { control: { type: "range", min: 0, max: 8 } },
@@ -25,9 +59,6 @@ const meta = {
     // onClick: fn()
   },
 } satisfies Meta<BlockClockProps>;
-
-export default meta;
-type Story = StoryObj<ButtonProps>;
 
 // More on writing stories with args: https://storybook.js.org/docs/writing-stories/args
 export const Primary: Story = {
