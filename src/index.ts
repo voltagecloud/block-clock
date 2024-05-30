@@ -13,8 +13,8 @@ export class Index extends LitElement {
   @property({ type: Number }) ringWidth = 2;
   @property({ type: Number }) syncProgress = 10;
   @property({ type: Number }) blockHeight = 0;
-  @property({ type: Boolean }) syncing = true;
-  @property({ type: Boolean }) connected = true;
+  @property({ type: Boolean }) syncing = false;
+  @property({ type: Boolean }) connected = false;
 
   @state()
   blockTimes: number[] = []; // UTC timestamps in seconds
@@ -36,6 +36,8 @@ export class Index extends LitElement {
     ];
   }
 
+  // TODO: convert seconds timestamp differences proportionally
+  // into degrees based on 12-hour time periods
   calculateDashArray(progress: number, segments: number[], gap = 2) {
     const circumference = Math.PI * (50 * 2);
     // If no progres, no dasharray needs to be calculated

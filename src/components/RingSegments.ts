@@ -1,6 +1,7 @@
 import { html } from "lit";
 import { RingTrack } from "./RingTrack";
 import { styleMap } from "lit/directives/style-map.js";
+import { Segment } from "./Segment";
 
 export interface RingSegmentsProps {
   ringWidth: number;
@@ -8,17 +9,7 @@ export interface RingSegmentsProps {
   segments: number[];
 }
 
-export const RingSegments = ({
-  ringFillAngle = 0,
-  ringWidth,
-  segments,
-}: RingSegmentsProps) => {
-  const animatedStyle = {
-    transition: "stroke-dasharray 1s ease-in-out",
-    "stroke-dasharray": calculateDashArray(ringFillAngle),
-    "stroke-width": ringWidth,
-  };
-
+export const RingSegments = ({ ringWidth, segments }: RingSegmentsProps) => {
   return html`
     ${RingTrack({ ringWidth, size: 1 })}
     <svg style="${styleMap(ringStyle)}" class="ring" viewBox="0 0 100 100">
@@ -28,32 +19,15 @@ export const RingSegments = ({
           <stop offset="100%" style="stop-color: blue; stop-opacity: 1" />
         </linearGradient>
       </defs>
-      <path
-        style="${styleMap(animatedStyle)}"
-        d="
-            M 50,
-            50 m -${50 - ringWidth / 2},
-            0 a ${50 - ringWidth / 2},
-            ${50 - ringWidth / 2} 0 1,
-            1 ${2 * (50 - ringWidth / 2)},
-            0 a ${50 - ringWidth / 2},
-            ${50 - ringWidth / 2} 0 1,1 -${2 * (50 - ringWidth / 2)},
-            0"
-        stroke="yellow"
-        stroke-width="${ringWidth}"
-        fill="none"
-        stroke-linecap="round"
-      />
+      ${Segment({
+        ringWidth,
+        color: "yellow",
+        isStart: true,
+        isEnd: false,
+      })}
     </svg>
   `;
 };
-
-function calculateDashArray(f: number) {
-  const circumference = Math.PI * (50 * 2);
-  const progress = (f / 360) * circumference;
-  const remaining = circumference - progress;
-  return `${progress}px ${remaining}px`;
-}
 
 const ringStyle = {
   position: "absolute",

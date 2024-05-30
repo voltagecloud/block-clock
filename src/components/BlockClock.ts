@@ -16,23 +16,27 @@ export const BlockClock = ({
   syncProgress = 0,
   blockHeight = 0,
   blockTimes = [],
-  syncing = true,
-  connected = true,
+  syncing = false,
+  connected = false,
 }: BlockClockProps) => {
   const commaDelimitedBlockHeight = numberWithCommas(blockHeight);
+  console.log({ syncing, connected });
   return html`
     <div class="square">
       <div class="circle">
-        ${!syncing && connected
-          ? RingSegments({
-              ringFillAngle: syncProgress * 3.6, // 3.6 = 360 / 100
-              ringWidth,
-              segments: blockTimes,
-            })
-          : Ring({
-              ringFillAngle: syncProgress * 3.6, // 3.6 = 360 / 100
-              ringWidth,
-            })}
+        ${
+          // !syncing && connected
+          // ? RingSegments({
+          //     ringFillAngle: syncProgress * 3.6, // 3.6 = 360 / 100
+          //     ringWidth,
+          //     segments: blockTimes,
+          //   })
+          // :
+          Ring({
+            ringFillAngle: syncProgress * 3.6, // 3.6 = 360 / 100
+            ringWidth,
+          })
+        }
         <div class="content">
           <div class="bitcoin-logo">
             <svg
