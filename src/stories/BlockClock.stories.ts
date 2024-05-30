@@ -11,6 +11,35 @@ const meta = {
       ringWidth: args.ringWidth,
       syncProgress: args.syncProgress,
       blockHeight: args.blockHeight,
+      blockTimes: args.blockTimes,
+      syncing: args.syncing,
+      connected: args.connected,
+    }),
+  argTypes: {
+    ringWidth: { control: { type: "range", min: 0, max: 8 } },
+    syncProgress: { control: { type: "range", min: 0, max: 100 } },
+    blockHeight: { control: { type: "range", min: 0, max: 1_000_000 } },
+    // size: {
+    //   control: { type: "select" },
+    //   options: ["small", "medium", "large"],
+    // },
+  },
+  args: {
+    // onClick: fn()
+  },
+} satisfies Meta<BlockClockProps>;
+
+export const BlockClockSynced = {
+  title: "Synced Block Clock",
+  tags: ["autodocs"],
+  render: (args) =>
+    BlockClock({
+      ringWidth: args.ringWidth,
+      syncProgress: args.syncProgress,
+      blockHeight: args.blockHeight,
+      blockTimes: args.blockTimes,
+      syncing: false,
+      connected: true,
     }),
   argTypes: {
     ringWidth: { control: { type: "range", min: 0, max: 8 } },

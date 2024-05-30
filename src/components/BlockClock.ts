@@ -1,45 +1,38 @@
 import { html } from "lit";
 import { Ring } from "./Ring";
+import { RingSegments } from "./RingSegments";
 
 export interface BlockClockProps {
   ringWidth: number;
   syncProgress: number;
   blockHeight: number;
+  blockTimes: number[];
+  syncing: boolean;
+  connected: boolean;
 }
 
 export const BlockClock = ({
   ringWidth = 2,
   syncProgress = 0,
   blockHeight = 0,
+  blockTimes = [],
+  syncing = true,
+  connected = true,
 }: BlockClockProps) => {
-  let blockTimes: number[] = []; // UTC timestamps in seconds
-
-  function setBlockTimesFromRpc() {
-    // Fetch the block times from the RPC
-    // this.blockTimes = rpc.getBlockTimes();
-    // Approx 72 blocks can happen in 12 hrs.
-    blockTimes = [
-      1685401200, 1685401800, 1685402400, 1685406000, 1685409600, 1685413200,
-      1685415000, 1685420400, 1685424000, 1685431200, 1685433000, 1685436600,
-      1685440200, 1685442000, 1685445600, 1685452800, 1685454600, 1685458200,
-      1685465400, 1685472600, 1685476200, 1685481600, 1685485200, 1685492400,
-      1685494200, 1685497800, 1685505000, 1685508600, 1685515800, 1685523000,
-      1685526600, 1685530200, 1685537400, 1685541000, 1685544600, 1685548200,
-      1685551800, 1685555400, 1685559000, 1685566200, 1685573400, 1685577000,
-      1685580600, 1685587800, 1685591400, 1685595000, 1685602200, 1685605800,
-      1685609400, 1685613000,
-    ];
-  }
-
-  setBlockTimesFromRpc();
   const commaDelimitedBlockHeight = numberWithCommas(blockHeight);
   return html`
     <div class="square">
       <div class="circle">
-        ${Ring({
-          ringFillAngle: syncProgress * 3.6, // 3.6 = 360 / 100
-          ringWidth,
-        })}
+        ${!syncing && connected
+          ? RingSegments({
+              ringFillAngle: syncProgress * 3.6, // 3.6 = 360 / 100
+              ringWidth,
+              segments: blockTimes,
+            })
+          : Ring({
+              ringFillAngle: syncProgress * 3.6, // 3.6 = 360 / 100
+              ringWidth,
+            })}
         <div class="content">
           <div class="bitcoin-logo">
             <svg

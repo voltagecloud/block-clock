@@ -13,43 +13,64 @@ export class Index extends LitElement {
   @property({ type: Number }) ringWidth = 2;
   @property({ type: Number }) syncProgress = 10;
   @property({ type: Number }) blockHeight = 0;
+  @property({ type: Boolean }) syncing = true;
+  @property({ type: Boolean }) connected = true;
 
   @state()
   blockTimes: number[] = []; // UTC timestamps in seconds
-
-  @state()
-  segmentLengths: number[] = [];
 
   setBlockTimesFromRpc() {
     // Fetch the block times from the RPC
     // this.blockTimes = rpc.getBlockTimes();
     // Approx 72 blocks can happen in 1 hour
     this.blockTimes = [
-      1634304000, 1634307600, 1634311200, 1634314800, 1634318400, 1634322000,
-      1634325600, 1634329200, 1634332800, 1634336400, 1634340000, 1634343600,
-      1634347200, 1634350800, 1634354400, 1634358000, 1634361600, 1634365200,
-      1634368800, 1634372400, 1634376000, 1634379600, 1634383200, 1634386800,
-      1634390400, 1634394000, 1634397600, 1634401200, 1634404800, 1634408400,
-      1634412000, 1634415600, 1634419200, 1634422800, 1634426400, 1634430000,
-      1634433600, 1634437200, 1634440800, 1634444400, 1634448000, 1634451600,
-      1634455200, 1634458800, 1634462400, 1634466000, 1634469600, 1634473200,
-      1634476800, 1634480400, 1634484000, 1634487600, 1634491200, 1634494800,
-      1634498400, 1634502000, 1634505600, 1634509200, 1634512800, 1634516400,
-      1634520000, 1634523600, 1634527200, 1634530800, 1634534400, 1634538000,
-      1634541600, 1634545200, 1634548800, 1634552400, 1634556000,
+      1685401200, 1685401800, 1685402400, 1685406000, 1685409600, 1685413200,
+      1685415000, 1685420400, 1685424000, 1685431200, 1685433000, 1685436600,
+      1685440200, 1685442000, 1685445600, 1685452800, 1685454600, 1685458200,
+      1685465400, 1685472600, 1685476200, 1685481600, 1685485200, 1685492400,
+      1685494200, 1685497800, 1685505000, 1685508600, 1685515800, 1685523000,
+      1685526600, 1685530200, 1685537400, 1685541000, 1685544600, 1685548200,
+      1685551800, 1685555400, 1685559000, 1685566200, 1685573400, 1685577000,
+      1685580600, 1685587800, 1685591400, 1685595000, 1685602200, 1685605800,
+      1685609400, 1685613000,
     ];
   }
 
-  getSegmentLengthsNormalized() {
-    // Normalize the segment lengths based on the blocktimes (min normal =0, max normal = 100)
-    this.segmentLengths = [];
-    const range = Math.max(...this.blockTimes) - Math.min(...this.blockTimes);
-    this.blockTimes.forEach((blockTime) => {
-      this.segmentLengths.push(
-        ((blockTime - Math.min(...this.blockTimes)) / range) * 100
-      );
-    });
-    console.log("Seg", this.segmentLengths);
+  calculateDashArray(progress: number, segments: number[], gap = 2) {
+    const circumference = Math.PI * (50 * 2);
+    // If no progres, no dasharray needs to be calculated
+    if (progress <= 0) {
+      return `0px ${circumference}`;
+    }
+    // TODO, progress is simply the time that's passed, filled should be based on the time since the last 12-hour cycle
+
+    const SECONDS = 43200; // 12 hours in seconds
+    //   const diffs = differences(segments);
+    //   const normalized = normalize(diffs);
+    //   const coef = getScaleCoefficient(normalized, filled);
+    //   const proportions = normalized.map((n) => n * coef);
+    //   const dashes = proportions.map((dash) => `${dash}px ${gap}px`).join(" ");
+    //   const remaining = circumference - filled;
+    //   // Need to ensure that remaining always ends as a gap, not a dash
+    //   // If proportions.length is even, last element is gap, else dash
+    //   const dasharray =
+    //     proportions.length % 2 === 0
+    //       ? `${dashes} ${remaining}px`
+    //       : `${dashes} 0px ${remaining}px`;
+    //   console.log({
+    //     dashes,
+    //     filled,
+    //     remaining,
+    //     normalized,
+    //     proportions,
+    //     dasharray,
+    //     diffs,
+    //     coef,
+    //     circumference,
+    //   });
+
+    //   return dasharray;
+    return `${progress}px ${circumference - progress}`;
   }
 
   render() {
@@ -57,6 +78,9 @@ export class Index extends LitElement {
       ringWidth: this.ringWidth,
       syncProgress: this.syncProgress,
       blockHeight: this.blockHeight,
+      blockTimes: this.blockTimes,
+      syncing: this.syncing,
+      connected: this.connected,
     });
   }
 }
