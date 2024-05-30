@@ -42,11 +42,12 @@ export const Ring = ({ ringFillAngle = 0, ringWidth }: RingProps) => {
     </svg>
   `;
 };
+
 function calculateDashArray(f: number) {
   const circumference = Math.PI * (50 * 2);
-  const filled = (f / 100) * circumference;
-  const remaining = circumference - filled;
-  return `${filled}px ${remaining}px`;
+  const progress = (f / 360) * circumference;
+  const remaining = circumference - progress;
+  return `${progress}px ${remaining}px`;
 }
 
 const ringStyle = {
