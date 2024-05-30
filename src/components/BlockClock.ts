@@ -12,11 +12,45 @@ export const BlockClock = ({
   syncProgress = 0,
   blockHeight = 0,
 }: BlockClockProps) => {
+  let blockTimes: number[] = []; // UTC timestamps in seconds
+
+  function setBlockTimesFromRpc() {
+    // Fetch the block times from the RPC
+    // this.blockTimes = rpc.getBlockTimes();
+    // Approx 72 blocks can happen in 12 hrs.
+    blockTimes = [
+      1634304000,
+      1634308000, // + 400000 (randomized difference)
+      1634312000,
+      1634316000,
+      1634320000,
+      1634324400, // + 440000 (randomized difference)
+      1634332800,
+      1634340400,
+      1634350800,
+      1634361600,
+      1634372400,
+      1634383200,
+      1634394000,
+      1634404800,
+      1634415600,
+      1634426400,
+      1634437200,
+      1634448000,
+      1634458800, // + 108000 (randomized difference)
+    ];
+  }
+
+  setBlockTimesFromRpc();
   const commaDelimitedBlockHeight = numberWithCommas(blockHeight);
   return html`
     <div class="square">
       <div class="circle">
-        ${Ring({ ringFillAngle: syncProgress * 3.6, ringWidth })}
+        ${Ring({
+          ringFillAngle: syncProgress * Math.PI - 5,
+          ringWidth,
+          segments: blockTimes,
+        })}
         <div class="content">
           <div class="bitcoin-logo">
             <svg
