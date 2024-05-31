@@ -1,5 +1,5 @@
 export const DEFAULT_RING_WIDTH = 2;
-export const DEFAULT_TRIM_LENGTH = 3;
+export const DEFAULT_TRIM_SIZE = 1.5; // Multiplier of ring width
 export const DEFAULT_THEME = {
   colors: {
     blockConfirmationColors: [

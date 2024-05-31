@@ -1,5 +1,5 @@
 import { svg } from "lit";
-import { DEFAULT_TRIM_LENGTH } from "../utils/constants";
+import { DEFAULT_TRIM_SIZE } from "../utils/constants";
 
 export interface RingSegmentProps {
   ringWidth: number;
@@ -23,12 +23,13 @@ export const RingSegment = ({
 
   // Calculate the length of the arc
   const arcLength = circumference * (Math.abs(endAngle - startAngle) / 360);
-  let computedTrim = DEFAULT_TRIM_LENGTH;
+  const defaultTrim = ringWidth * DEFAULT_TRIM_SIZE;
+  let computedTrim = defaultTrim;
 
   // Calculate the stroke dasharray to hide the beginning and end of the arc
   if (arcLength < computedTrim) {
     const xsTrim = arcLength / 2;
-    computedTrim = Math.min(xsTrim, DEFAULT_TRIM_LENGTH);
+    computedTrim = Math.min(xsTrim, defaultTrim);
   }
 
   const dashArray = `${arcLength - computedTrim}px ${computedTrim}px`;
@@ -44,7 +45,7 @@ export const RingSegment = ({
       fill="none"
       stroke-dasharray="${dashArray}"
       stroke-dashoffset="-${computedTrim / 2}"
-      stroke-linecap="${computedTrim < DEFAULT_TRIM_LENGTH ? "none" : "round"}"
+      stroke-linecap="${computedTrim < defaultTrim ? "none" : "round"}"
     ></path>
   `;
 };
