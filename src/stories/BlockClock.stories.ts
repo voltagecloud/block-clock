@@ -1,20 +1,25 @@
 import type { Meta, StoryObj } from "@storybook/web-components";
 import type { ButtonProps } from "./Button";
 import { BlockClock, type BlockClockProps } from "../components/BlockClock";
+import { html } from "lit";
 
-// More on how to set up stories at: https://storybook.js.org/docs/writing-stories
-const meta = {
-  title: "BlockClock",
-  tags: ["autodocs"],
-  render: (args) =>
-    BlockClock({
+const getBlockClockDemo = (args: BlockClockProps) =>
+  html`<div style="width: 300px; height: 300px;">
+    ${BlockClock({
       ringWidth: args.ringWidth,
       syncProgress: args.syncProgress,
       blockHeight: args.blockHeight,
       blockTimes: args.blockTimes,
       syncing: false,
       connected: false,
-    }),
+    })}
+  </div>`;
+
+// More on how to set up stories at: https://storybook.js.org/docs/writing-stories
+const meta = {
+  title: "BlockClock",
+  tags: ["autodocs"],
+  render: getBlockClockDemo,
   argTypes: {
     ringWidth: { control: { type: "range", min: 0, max: 8 } },
     syncProgress: { control: { type: "range", min: 0, max: 100 } },
@@ -38,14 +43,7 @@ export const BlockClockSynced = {
   title: "Synced Block Clock",
   tags: ["autodocs"],
   render: (args) =>
-    BlockClock({
-      ringWidth: args.ringWidth,
-      syncProgress: args.syncProgress,
-      blockHeight: args.blockHeight,
-      blockTimes: args.blockTimes,
-      syncing: false,
-      connected: true,
-    }),
+    getBlockClockDemo({ ...args, syncing: true, connected: true }),
   argTypes: {
     ringWidth: { control: { type: "range", min: 0, max: 8 } },
     syncProgress: { control: { type: "range", min: 0, max: 100 } },
