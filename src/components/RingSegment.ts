@@ -12,10 +12,18 @@ export const RingSegment = ({
   ringWidth,
 }: RingSegmentProps) => {
   const radius = 50 - ringWidth / 2;
+  const circumference = 2 * Math.PI * radius;
   const startX = 50 + radius * Math.cos((startAngle - 90) * (Math.PI / 180));
   const startY = 50 + radius * Math.sin((startAngle - 90) * (Math.PI / 180));
   const endX = 50 + radius * Math.cos((endAngle - 90) * (Math.PI / 180));
   const endY = 50 + radius * Math.sin((endAngle - 90) * (Math.PI / 180));
+
+  // Calculate the length of the arc
+  const arcLength = circumference * (Math.abs(endAngle - startAngle) / 360);
+
+  // Calculate the stroke dasharray to hide the beginning and end of the arc
+  const trimLength = 2;
+  const dashArray = `${arcLength - trimLength}px ${trimLength}px`;
 
   return svg`
     <path
@@ -26,7 +34,8 @@ export const RingSegment = ({
       stroke="yellow"
       stroke-width="${ringWidth}"
       fill="none"
-      stroke-linecap="round"
+      stroke-dasharray="${dashArray}"
+      stroke-dashoffset="-${trimLength / 2}"
     ></path>
   `;
 };

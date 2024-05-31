@@ -1,4 +1,4 @@
-import { html, svg } from "lit";
+import { svg } from "lit";
 import { RingTrack } from "./RingTrack";
 import { styleMap } from "lit/directives/style-map.js";
 import { RingSegment } from "./RingSegment";
@@ -9,15 +9,23 @@ export interface RingSegmentedProps {
   segments: number[];
 }
 
+// TODO:
+// - Trim fat.
+// - Everything is minimally visible (i.e. if 2 blocks are mined consecutively it will still show).
+
 export const RingSegmented = ({
   ringWidth = DEFAULT_RING_WIDTH,
   segments,
 }: RingSegmentedProps) => {
-  return html`
+  const arcs = segmentsToArcs(segments);
+
+  // Function to transform segments into start and end angles
+
+  return svg`
     ${RingTrack({ ringWidth, size: 1 })}
     <svg style="${styleMap(ringStyle)}" class="ring" viewBox="0 0 100 100">
-      ${segments.map((segment) => {
-        return svg`${RingSegment({ ringWidth, startAngle: 0, endAngle: 90 })}`;
+      ${arcs.map(({ start, end }) => {
+        return svg`${RingSegment({ ringWidth, startAngle: start, endAngle: end })}`;
       })};
     </svg>
   `;
@@ -31,3 +39,14 @@ const ringStyle = {
   left: "0",
   zIndex: 1,
 };
+
+function segmentsToArcs(segments: number[]) {
+  return segments.reduce(
+    (acc: { start: number; end: number }[], segment: any, index: number) => {
+      const start = acc[index - 1]?.end || 0;
+      const end = start + segment;
+      return [...acc, { start, end }];
+    },
+    []
+  );
+}
