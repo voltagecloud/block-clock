@@ -3,19 +3,18 @@ import { RingTrack } from "./RingTrack";
 import { styleMap } from "lit/directives/style-map.js";
 import { RingSegment } from "./RingSegment";
 import { DEFAULT_RING_WIDTH } from "../utils/constants";
+import { BlockClockTheme } from "../lib/types";
 
 export interface RingSegmentedProps {
   ringWidth: number;
   segments: number[];
+  theme: BlockClockTheme;
 }
-
-// TODO:
-// - Trim fat.
-// - Everything is minimally visible (i.e. if 2 blocks are mined consecutively it will still show).
 
 export const RingSegmented = ({
   ringWidth = DEFAULT_RING_WIDTH,
   segments,
+  theme,
 }: RingSegmentedProps) => {
   const arcs = segmentsToArcs(segments);
 
@@ -24,8 +23,14 @@ export const RingSegmented = ({
   return svg`
     ${RingTrack({ ringWidth, size: 1 })}
     <svg style="${styleMap(ringStyle)}" class="ring" viewBox="0 0 100 100">
-      ${arcs.map(({ start, end }) => {
-        return svg`${RingSegment({ ringWidth, startAngle: start, endAngle: end })}`;
+      ${arcs.map(({ start, end }, i) => {
+        const indexFromLast = arcs.length - i - 1;
+        return svg`${RingSegment({
+          ringWidth,
+          startAngle: start,
+          endAngle: end,
+          color: getBlockConfirmationColor(theme, indexFromLast),
+        })}`;
       })};
     </svg>
   `;
@@ -48,5 +53,14 @@ function segmentsToArcs(segments: number[]) {
       return [...acc, { start, end }];
     },
     []
+  );
+}
+
+function getBlockConfirmationColor(theme: BlockClockTheme, index: number) {
+  return (
+    theme.colors.blockConfirmationColors[index] ||
+    theme.colors.blockConfirmationColors[
+      theme.colors.blockConfirmationColors.length
+    ]
   );
 }

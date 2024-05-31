@@ -3,7 +3,8 @@ import { classMap } from "lit/directives/class-map.js";
 import { NodeDownloading } from "./NodeDownloading.ts";
 import { NodeReady } from "./NodeReady.ts";
 import { NodeConnecting } from "./NodeConnecting.ts";
-import { DEFAULT_RING_WIDTH } from "../utils/constants.ts";
+import { DEFAULT_RING_WIDTH, DEFAULT_THEME } from "../utils/constants.ts";
+import { BlockClockTheme } from "../lib/types.ts";
 
 export interface BlockClockProps {
   ringWidth: number;
@@ -13,6 +14,7 @@ export interface BlockClockProps {
   connected: boolean;
   darkMode: boolean;
   downloading: boolean;
+  theme: BlockClockTheme;
 }
 
 export const BlockClock = ({
@@ -23,13 +25,14 @@ export const BlockClock = ({
   darkMode = true,
   downloading = false,
   segments = [],
+  theme = DEFAULT_THEME,
 }: BlockClockProps) => {
   const baseClass = { circle: true, dark: darkMode };
 
   const clock = connected
     ? downloading
       ? NodeDownloading({ downloadProgress })
-      : NodeReady({ blockHeight, ringWidth, segments })
+      : NodeReady({ blockHeight, ringWidth, segments, theme })
     : NodeConnecting();
 
   return html`

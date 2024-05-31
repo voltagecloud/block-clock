@@ -24,7 +24,7 @@ const meta = {
     ringWidth: 2,
     downloadProgress: 0,
     blockHeight: 840_000,
-    segments: [90, 90, 90, 90],
+    segments: [5, 13, 21, 18, 10, 8, 5, 3, 2, 1],
   },
 } satisfies Meta<BlockClockProps>;
 
