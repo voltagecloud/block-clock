@@ -5,6 +5,7 @@ import { Title } from "./Title";
 import { Subtitle } from "./Subtitle";
 import { numberWithCommas } from "../utils/format.ts";
 import { Indicator } from "./Indicator.ts";
+import { classMap } from "lit/directives/class-map.js";
 
 export interface BlockClockProps {
   ringWidth: number;
@@ -13,6 +14,7 @@ export interface BlockClockProps {
   blockTimes: number[];
   syncing: boolean;
   connected: boolean;
+  darkMode: boolean;
 }
 
 export const BlockClock = ({
@@ -21,11 +23,13 @@ export const BlockClock = ({
   blockHeight = 0,
   syncing = false,
   connected = false,
+  darkMode = true,
 }: BlockClockProps) => {
   const commaDelimitedBlockHeight = numberWithCommas(blockHeight);
-  console.log({ syncing, connected });
+  const baseClass = { circle: true, dark: darkMode };
+
   return html`
-    <div class="circle">
+    <div class=${classMap(baseClass)}>
       ${Ring({
         ringFillAngle: syncProgress * 3.6, // 3.6 = 360 / 100
         ringWidth,
@@ -52,10 +56,9 @@ export const BlockClock = ({
         display: flex;
         justify-content: center;
         align-items: center;
-        background-color: black;
+        background-color: var(--bg-color, black);
         max-height: 100%;
         border-radius: 50%;
-        border: 5px solid black;
         aspect-ratio: 1/1;
         container-type: inline-size;
       }
@@ -77,6 +80,21 @@ export const BlockClock = ({
           align-items: center;
           gap: 2cqi;
         }
+      }
+
+      /** Theme */
+      :root {
+        --title-text-color: #333;
+        --subtitle-text-color: #666;
+        --bg-color: white;
+        --ring-track-color: #ccc;
+      }
+
+      :root .dark {
+        --title-text-color: white;
+        --subtitle-text-color: #808080;
+        --bg-color: black;
+        --ring-track-color: #333;
       }
     </style>
   `;

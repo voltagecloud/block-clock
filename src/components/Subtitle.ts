@@ -10,7 +10,7 @@ export const Subtitle = ({ text }: SubtitleProps) => {
 };
 
 const style = {
-  color: "#808080",
+  color: "var(--subtitle-text-color, #808080)",
   "font-size": "9cqi",
   "font-weight": "bold",
 };

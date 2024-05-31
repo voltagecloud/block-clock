@@ -8,24 +8,30 @@ export interface RingTrackProps {
 
 export const RingTrack = ({ ringWidth, size }: RingTrackProps) => {
   return html`
-    <svg viewBox="0 0 100 100" style=${styleMap(ringTrackStyle)}>
+    <svg viewBox="0 0 100 100" style=${styleMap(styles.svg)}>
       <circle
+        style=${styleMap(styles.svgCircle)}
         cx="50"
         cy="50"
         r=${50 - ringWidth / 2}
-        stroke="#333"
         stroke-width="${ringWidth * size}"
       />
     </svg>
   `;
 };
 
-const ringTrackStyle = {
-  position: "absolute",
-  width: "100%",
-  height: "100%",
-  top: "0",
-  left: "0",
-  zIndex: 1,
-  transform: "rotate(-90deg)",
+const styles = {
+  svg: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    top: "0",
+    left: "0",
+    zIndex: 1,
+    transform: "rotate(-90deg)",
+    fill: "none",
+  },
+  svgCircle: {
+    stroke: "var(--ring-track-color, #333)",
+  },
 };

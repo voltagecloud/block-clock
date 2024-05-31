@@ -58,4 +58,5 @@ const ringStyle = {
   left: "0",
   zIndex: 1,
   transform: "rotate(90deg)",
+  background: "transparent",
 };
