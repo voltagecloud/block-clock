@@ -13,55 +13,40 @@ const meta = {
   render: getBlockClockDemo,
   argTypes: {
     ringWidth: { control: { type: "range", min: 0, max: 8 } },
-    syncProgress: { control: { type: "range", min: 0, max: 100 } },
+    downloadProgress: { control: { type: "range", min: 0, max: 100 } },
     blockHeight: { control: { type: "range", min: 0, max: 9_999_999 } },
+    connected: { control: "boolean" },
   },
   args: {
     darkMode: true,
-    syncing: false,
-    connected: true,
+    connected: false,
+    downloading: false,
     ringWidth: 2,
-    syncProgress: 0,
+    downloadProgress: 0,
     blockHeight: 840_000,
   },
 } satisfies Meta<BlockClockProps>;
 
 export default meta;
-type Story = StoryObj<ButtonProps>;
+type Story = StoryObj<BlockClockProps>;
 
-export const BlockClockSynced = {
-  title: "Synced Block Clock",
-  tags: ["autodocs"],
-  render: (args) =>
-    getBlockClockDemo({ ...args, syncing: true, connected: true }),
-  argTypes: {},
-  args: {},
-} satisfies Meta<BlockClockProps>;
-
-// More on writing stories with args: https://storybook.js.org/docs/writing-stories/args
-export const Primary: Story = {
+export const Connecting: Story = {
   args: {
-    primary: true,
-    label: "Button",
+    downloading: false,
+    connected: false,
   },
 };
 
-export const Secondary: Story = {
+export const Downloading: Story = {
   args: {
-    label: "Button",
+    downloading: true,
+    connected: true,
   },
 };
 
-export const Large: Story = {
+export const Ready: Story = {
   args: {
-    size: "large",
-    label: "Button",
-  },
-};
-
-export const Small: Story = {
-  args: {
-    size: "small",
-    label: "Button",
+    downloading: false,
+    connected: true,
   },
 };

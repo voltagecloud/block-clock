@@ -10,7 +10,7 @@ export const Title = ({ text }: TitleProps) => {
 };
 
 const style = {
-  "font-size": "15cqi",
+  "font-size": "12cqi",
   "font-weight": "bold",
   color: "var(--title-text-color, white)",
 };

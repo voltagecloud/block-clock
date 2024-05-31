@@ -1,44 +1,39 @@
 import { html } from "lit";
-import { Ring } from "./Ring";
-import { BitcoinLogo } from "./BitcoinLogo";
-import { Title } from "./Title";
-import { Subtitle } from "./Subtitle";
 import { numberWithCommas } from "../utils/format.ts";
-import { Indicator } from "./Indicator.ts";
 import { classMap } from "lit/directives/class-map.js";
+import { NodeDownloading } from "./NodeDownloading.ts";
+import { NodeReady } from "./NodeReady.ts";
+import { NodeConnecting } from "./NodeConnecting.ts";
 
 export interface BlockClockProps {
   ringWidth: number;
-  syncProgress: number;
+  downloadProgress: number;
   blockHeight: number;
   blockTimes: number[];
-  syncing: boolean;
   connected: boolean;
   darkMode: boolean;
+  downloading: boolean;
 }
 
 export const BlockClock = ({
   ringWidth = 2,
-  syncProgress = 0,
+  downloadProgress = 0,
   blockHeight = 0,
-  syncing = false,
   connected = false,
   darkMode = true,
+  downloading = false,
 }: BlockClockProps) => {
   const commaDelimitedBlockHeight = numberWithCommas(blockHeight);
   const baseClass = { circle: true, dark: darkMode };
 
+  const clock = connected
+    ? downloading
+      ? NodeDownloading({ downloadProgress })
+      : NodeReady({ blockHeight })
+    : NodeConnecting();
+
   return html`
-    <div class=${classMap(baseClass)}>
-      ${Ring({
-        ringFillAngle: syncProgress * 3.6, // 3.6 = 360 / 100
-        ringWidth,
-      })}
-      <div class="content">
-        ${BitcoinLogo()} ${Title({ text: commaDelimitedBlockHeight })}
-        ${Subtitle({ text: "Blocktime" })} ${Indicator()}
-      </div>
-    </div>
+    <div class=${classMap(baseClass)}>${clock}</div>
     <style>
       html,
       :host {

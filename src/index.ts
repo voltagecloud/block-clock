@@ -1,4 +1,4 @@
-import { LitElement, css } from "lit";
+import { LitElement } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { BlockClock } from "./components/BlockClock";
 
@@ -11,11 +11,11 @@ export class Index extends LitElement {
   };
 
   @property({ type: Number }) ringWidth = 2;
-  @property({ type: Number }) syncProgress = 10;
+  @property({ type: Number }) downloadProgress = 10;
   @property({ type: Number }) blockHeight = 0;
-  @property({ type: Boolean }) syncing = false;
   @property({ type: Boolean }) connected = false;
   @property({ type: Boolean }) darkMode = true;
+  @property({ type: Boolean }) downloading = false;
 
   @state()
   blockTimes: number[] = []; // UTC timestamps in seconds
@@ -79,12 +79,12 @@ export class Index extends LitElement {
   render() {
     return BlockClock({
       ringWidth: this.ringWidth,
-      syncProgress: this.syncProgress,
+      downloadProgress: this.downloadProgress,
       blockHeight: this.blockHeight,
       blockTimes: this.blockTimes,
-      syncing: this.syncing,
       connected: this.connected,
       darkMode: this.darkMode,
+      downloading: this.downloading,
     });
   }
 }
