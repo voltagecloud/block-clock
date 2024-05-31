@@ -1,6 +1,7 @@
 import { html } from "lit";
 import { RingTrack } from "./RingTrack";
 import { styleMap } from "lit/directives/style-map.js";
+import { calculateDashArray } from "../utils/svg";
 
 export interface RingProps {
   ringWidth: number;
@@ -16,13 +17,7 @@ export const Ring = ({ ringFillAngle = 0, ringWidth }: RingProps) => {
 
   return html`
     ${RingTrack({ ringWidth, size: 1 })}
-    <svg style="${styleMap(ringStyle)}" class="ring" viewBox="0 0 100 100">
-      <defs>
-        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color: red; stop-opacity: 1" />
-          <stop offset="100%" style="stop-color: blue; stop-opacity: 1" />
-        </linearGradient>
-      </defs>
+    <svg style="${styleMap(ringStyle)}" viewBox="0 0 100 100">
       <path
         style="${styleMap(animatedStyle)}"
         d="
@@ -42,13 +37,6 @@ export const Ring = ({ ringFillAngle = 0, ringWidth }: RingProps) => {
     </svg>
   `;
 };
-
-function calculateDashArray(f: number) {
-  const circumference = Math.PI * (50 * 2);
-  const progress = (f / 360) * circumference;
-  const remaining = circumference - progress;
-  return `${progress}px ${remaining}px`;
-}
 
 const ringStyle = {
   position: "absolute",

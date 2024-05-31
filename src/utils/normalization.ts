@@ -1,6 +1,6 @@
 // TODO: convert seconds timestamp differences proportionally
 // into degrees based on 12-hour time periods
-export function calculateDashArray(
+export function calculateDashArrayTEMP(
   progress: number,
   segments: number[],
   gap = 2
