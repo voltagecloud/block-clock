@@ -1,5 +1,4 @@
 import { html } from "lit";
-import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
 
 export interface TitleProps {
