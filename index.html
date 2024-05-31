@@ -1,14 +1,25 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + Lit + TS</title>
-    <link rel="stylesheet" href="./src/index.css" />
     <script type="module" src="/src/index.ts"></script>
+    <style>
+      body {
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        place-items: center;
+        min-height: 100vh;
+        background-color: black;
+      }
+    </style>
   </head>
   <body>
-    <block-clock></block-clock>
+    <div style="width: 200px; height: 200px">
+      <block-clock></block-clock>
+    </div>
   </body>
 </html>

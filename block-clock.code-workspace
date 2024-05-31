@@ -1,0 +1,11 @@
+{
+  "folders": [
+	{
+		"path": "."
+	},
+	{
+		"path": "../voltage-block-clock-import"
+	}
+],
+  "settings": {}
+}

@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/web-components";
-import type { ButtonProps } from "./Button";
 import { BlockClock, type BlockClockProps } from "../components/BlockClock";
 import { html } from "lit";
 
@@ -9,7 +8,7 @@ const getBlockClockDemo = (args: BlockClockProps) =>
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories
 const meta = {
   title: "BlockClock",
-  tags: ["autodocs"],
+  tags: [],
   render: getBlockClockDemo,
   argTypes: {
     ringWidth: { control: { type: "range", min: 0, max: 8 } },
@@ -18,13 +17,13 @@ const meta = {
     connected: { control: "boolean" },
   },
   args: {
-    darkMode: true,
-    connected: false,
-    downloading: false,
-    ringWidth: 2,
-    downloadProgress: 0,
     blockHeight: 840_000,
-    segments: [5, 13, 21, 18, 10, 8, 5, 3, 2, 1],
+    connected: false,
+    darkMode: true,
+    downloading: false,
+    downloadProgress: 0,
+    ringSegments: [5, 13, 21, 18, 10, 8, 5, 3, 2, 1],
+    ringWidth: 2,
   },
 } satisfies Meta<BlockClockProps>;
 

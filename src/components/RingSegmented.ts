@@ -7,18 +7,18 @@ import { BlockClockTheme } from "../lib/types";
 
 export interface RingSegmentedProps {
   ringWidth: number;
-  segments: number[];
+  ringSegments: number[];
   theme: BlockClockTheme;
 }
 
 export const RingSegmented = ({
   ringWidth = DEFAULT_RING_WIDTH,
-  segments,
+  ringSegments,
   theme,
 }: RingSegmentedProps) => {
-  const arcs = segmentsToArcs(segments);
+  const arcs = segmentsToArcs(ringSegments);
 
-  // Function to transform segments into start and end angles
+  // Function to transform ringSegments into start and end angles
 
   return svg`
     ${RingTrack({ ringWidth, size: 1 })}
@@ -45,8 +45,8 @@ const ringStyle = {
   zIndex: 1,
 };
 
-function segmentsToArcs(segments: number[]) {
-  return segments.reduce(
+function segmentsToArcs(ringSegments: number[]) {
+  return ringSegments.reduce(
     (acc: { start: number; end: number }[], segment: any, index: number) => {
       const start = acc[index - 1]?.end || 0;
       const end = start + segment;

@@ -1,10 +1,12 @@
-import { LitElement } from "lit";
+import { LitElement, unsafeCSS } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { BlockClock } from "./components/BlockClock";
 import { DEFAULT_RING_WIDTH, DEFAULT_THEME } from "./utils/constants";
+import style from "./index.css?inline";
 
 @customElement("block-clock")
 export class Index extends LitElement {
+  static styles = unsafeCSS(style);
   static shadowRootOptions: ShadowRootInit = {
     ...LitElement.shadowRootOptions,
     delegatesFocus: true,
@@ -27,7 +29,7 @@ export class Index extends LitElement {
       ringWidth: this.ringWidth,
       downloadProgress: this.downloadProgress,
       blockHeight: this.blockHeight,
-      blockTimes: this.blockTimes,
+      ringSegments: [],
       theme: this.theme,
       connected: this.connected,
       darkMode: this.darkMode,

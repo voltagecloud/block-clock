@@ -1,8 +1,48 @@
-body {
-  margin: 0;
+html,
+:host {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: white;
+  text-align: left;
+}
+
+#wrapper {
   display: flex;
   justify-content: center;
-  place-items: center;
-  min-height: 100vh;
-  background-color: black;
+  align-items: center;
+  background-color: var(--bg-color, black);
+  max-height: 100%;
+  border-radius: 50%;
+  aspect-ratio: 1/1;
+  container-type: inline-size;
+}
+
+#wrapper > * {
+  z-index: 2;
+}
+
+#wrapper > .content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2cqi;
+}
+
+/** Theme */
+:root {
+  --title-text-color: #333;
+  --subtitle-text-color: #666;
+  --bg-color: white;
+  --ring-track-color: #ccc;
+}
+
+:root .dark {
+  --title-text-color: white;
+  --subtitle-text-color: #808080;
+  --bg-color: black;
+  --ring-track-color: #333;
 }

@@ -11,18 +11,18 @@ import { BlockClockTheme } from "../lib/types.ts";
 export interface NodeReadyProps {
   blockHeight: number;
   ringWidth: number;
-  segments: number[];
+  ringSegments: number[];
   theme: BlockClockTheme;
 }
 
 export const NodeReady = ({
   ringWidth = DEFAULT_RING_WIDTH,
   blockHeight,
-  segments,
+  ringSegments,
   theme,
 }: NodeReadyProps) => {
   return html`
-    ${RingSegmented({ ringWidth, segments, theme })}
+    ${RingSegmented({ ringWidth, ringSegments, theme })}
     <div class="content">
       ${BitcoinLogo()} ${Title({ text: numberWithCommas(blockHeight) })}
       ${Subtitle({ text: "Blocktime" })} ${Indicator()}
