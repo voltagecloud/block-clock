@@ -1,36 +1,29 @@
-import { html } from "lit";
-import { styleMap } from "lit/directives/style-map.js";
+import { svg } from "lit";
 
 export interface RingSegmentProps {
-  color: string;
-  isStart: boolean;
-  isEnd: boolean;
   ringWidth: number;
+  startAngle: number;
+  endAngle: number;
 }
 
 export const RingSegment = ({
-  color,
-  isStart,
-  isEnd,
+  startAngle,
+  endAngle,
   ringWidth,
 }: RingSegmentProps) => {
-  const animatedStyle = {
-    transition: "stroke-dasharray 1s ease-in-out",
-    "stroke-width": ringWidth,
-  };
-  return html`
+  const radius = 50 - ringWidth / 2;
+  const startX = 50 + radius * Math.cos((startAngle - 90) * (Math.PI / 180));
+  const startY = 50 + radius * Math.sin((startAngle - 90) * (Math.PI / 180));
+  const endX = 50 + radius * Math.cos((endAngle - 90) * (Math.PI / 180));
+  const endY = 50 + radius * Math.sin((endAngle - 90) * (Math.PI / 180));
+
+  return svg`
     <path
-      style="${styleMap(animatedStyle)}"
       d="
-            M 50,
-            50 m -${50 - ringWidth / 2},
-            0 a ${50 - ringWidth / 2},
-            ${50 - ringWidth / 2} 0 1,
-            1 ${2 * (50 - ringWidth / 2)},
-            0 a ${50 - ringWidth / 2},
-            ${50 - ringWidth / 2} 0 1,1 -${2 * (50 - ringWidth / 2)},
-            0"
-      stroke="${color}"
+        M ${startX},${startY}
+        A ${radius},${radius} 0 ${endAngle - startAngle > 180 ? 1 : 0},1 ${endX},${endY}
+      "
+      stroke="yellow"
       stroke-width="${ringWidth}"
       fill="none"
       stroke-linecap="round"

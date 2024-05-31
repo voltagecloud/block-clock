@@ -1,4 +1,4 @@
-import { html } from "lit";
+import { html, svg } from "lit";
 import { RingTrack } from "./RingTrack";
 import { styleMap } from "lit/directives/style-map.js";
 import { RingSegment } from "./RingSegment";
@@ -13,22 +13,12 @@ export const RingSegmented = ({
   ringWidth = DEFAULT_RING_WIDTH,
   segments,
 }: RingSegmentedProps) => {
-  console.log({ segments });
   return html`
     ${RingTrack({ ringWidth, size: 1 })}
     <svg style="${styleMap(ringStyle)}" class="ring" viewBox="0 0 100 100">
-      <defs>
-        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color: red; stop-opacity: 1" />
-          <stop offset="100%" style="stop-color: blue; stop-opacity: 1" />
-        </linearGradient>
-      </defs>
-      ${RingSegment({
-        ringWidth,
-        color: "yellow",
-        isStart: true,
-        isEnd: false,
-      })}
+      ${segments.map((segment) => {
+        return svg`${RingSegment({ ringWidth, startAngle: 0, endAngle: 90 })}`;
+      })};
     </svg>
   `;
 };
@@ -40,5 +30,4 @@ const ringStyle = {
   top: "0",
   left: "0",
   zIndex: 1,
-  transform: "rotate(90deg)",
 };
