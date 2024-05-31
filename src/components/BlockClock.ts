@@ -1,35 +1,35 @@
 import { html } from "lit";
-import { numberWithCommas } from "../utils/format.ts";
 import { classMap } from "lit/directives/class-map.js";
 import { NodeDownloading } from "./NodeDownloading.ts";
 import { NodeReady } from "./NodeReady.ts";
 import { NodeConnecting } from "./NodeConnecting.ts";
+import { DEFAULT_RING_WIDTH } from "../utils/constants.ts";
 
 export interface BlockClockProps {
   ringWidth: number;
   downloadProgress: number;
   blockHeight: number;
-  blockTimes: number[];
+  segments: number[];
   connected: boolean;
   darkMode: boolean;
   downloading: boolean;
 }
 
 export const BlockClock = ({
-  ringWidth = 2,
+  ringWidth = DEFAULT_RING_WIDTH,
   downloadProgress = 0,
   blockHeight = 0,
   connected = false,
   darkMode = true,
   downloading = false,
+  segments = [],
 }: BlockClockProps) => {
-  const commaDelimitedBlockHeight = numberWithCommas(blockHeight);
   const baseClass = { circle: true, dark: darkMode };
 
   const clock = connected
     ? downloading
       ? NodeDownloading({ downloadProgress })
-      : NodeReady({ blockHeight })
+      : NodeReady({ blockHeight, ringWidth, segments })
     : NodeConnecting();
 
   return html`

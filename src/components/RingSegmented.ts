@@ -1,15 +1,19 @@
 import { html } from "lit";
 import { RingTrack } from "./RingTrack";
 import { styleMap } from "lit/directives/style-map.js";
-import { Segment } from "./Segment";
+import { RingSegment } from "./RingSegment";
+import { DEFAULT_RING_WIDTH } from "../utils/constants";
 
-export interface RingSegmentsProps {
+export interface RingSegmentedProps {
   ringWidth: number;
-  ringFillAngle: number;
   segments: number[];
 }
 
-export const RingSegments = ({ ringWidth, segments }: RingSegmentsProps) => {
+export const RingSegmented = ({
+  ringWidth = DEFAULT_RING_WIDTH,
+  segments,
+}: RingSegmentedProps) => {
+  console.log({ segments });
   return html`
     ${RingTrack({ ringWidth, size: 1 })}
     <svg style="${styleMap(ringStyle)}" class="ring" viewBox="0 0 100 100">
@@ -19,7 +23,7 @@ export const RingSegments = ({ ringWidth, segments }: RingSegmentsProps) => {
           <stop offset="100%" style="stop-color: blue; stop-opacity: 1" />
         </linearGradient>
       </defs>
-      ${Segment({
+      ${RingSegment({
         ringWidth,
         color: "yellow",
         isStart: true,

@@ -1,14 +1,19 @@
 import { html } from "lit";
 import { styleMap } from "lit/directives/style-map.js";
 
-export interface SegmentProps {
+export interface RingSegmentProps {
   color: string;
   isStart: boolean;
   isEnd: boolean;
   ringWidth: number;
 }
 
-export const Segment = ({ color, isStart, isEnd, ringWidth }: SegmentProps) => {
+export const RingSegment = ({
+  color,
+  isStart,
+  isEnd,
+  ringWidth,
+}: RingSegmentProps) => {
   const animatedStyle = {
     transition: "stroke-dasharray 1s ease-in-out",
     "stroke-width": ringWidth,

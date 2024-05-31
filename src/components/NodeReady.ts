@@ -4,19 +4,22 @@ import { Title } from "./Title.ts";
 import { Subtitle } from "./Subtitle.ts";
 import { Indicator } from "./Indicator.ts";
 import { numberWithCommas } from "../utils/format.ts";
-import { Ring } from "./Ring.ts";
+import { RingSegmented } from "./RingSegmented.ts";
+import { DEFAULT_RING_WIDTH } from "../utils/constants.ts";
 
 export interface NodeReadyProps {
   blockHeight: number;
+  ringWidth: number;
+  segments: number[];
 }
 
-export const NodeReady = ({ blockHeight }: NodeReadyProps) => {
+export const NodeReady = ({
+  ringWidth = DEFAULT_RING_WIDTH,
+  blockHeight,
+  segments,
+}: NodeReadyProps) => {
   return html`
-    <!-- TODO SegmentRing -->
-    ${Ring({
-      ringFillAngle: 0 * 3.6,
-      ringWidth: 2,
-    })}
+    ${RingSegmented({ ringWidth, segments })}
     <div class="content">
       ${BitcoinLogo()} ${Title({ text: numberWithCommas(blockHeight) })}
       ${Subtitle({ text: "Blocktime" })} ${Indicator()}
