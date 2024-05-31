@@ -23,14 +23,15 @@ export const RingSegment = ({
 
   // Calculate the length of the arc
   const arcLength = circumference * (Math.abs(endAngle - startAngle) / 360);
+  let computedTrim = DEFAULT_TRIM_LENGTH;
 
   // Calculate the stroke dasharray to hide the beginning and end of the arc
-  if (arcLength < DEFAULT_TRIM_LENGTH) {
-    return svg``;
+  if (arcLength < computedTrim) {
+    const xsTrim = arcLength / 2;
+    computedTrim = Math.min(xsTrim, DEFAULT_TRIM_LENGTH);
   }
-  const dashArray = `${arcLength - DEFAULT_TRIM_LENGTH}px ${DEFAULT_TRIM_LENGTH}px`;
 
-  console.log(color);
+  const dashArray = `${arcLength - computedTrim}px ${computedTrim}px`;
 
   return svg`
     <path
@@ -42,7 +43,8 @@ export const RingSegment = ({
       stroke-width="${ringWidth}"
       fill="none"
       stroke-dasharray="${dashArray}"
-      stroke-dashoffset="-${DEFAULT_TRIM_LENGTH / 2}"
+      stroke-dashoffset="-${computedTrim / 2}"
+      stroke-linecap="${computedTrim < DEFAULT_TRIM_LENGTH ? "none" : "round"}"
     ></path>
   `;
 };
