@@ -13,27 +13,49 @@ export class Index extends LitElement {
     mode: "closed",
   };
 
-  @property({ type: Number }) ringWidth = DEFAULT_RING_WIDTH;
-  @property({ type: Number }) downloadProgress = 10;
-  @property({ type: Number }) blockHeight = 0;
-  @property({ type: Boolean }) connected = false;
+  @property({ type: String }) rpcEndpoint = "";
+  @property({ type: String }) rpcUser = "";
+  @property({ type: String }) rpcPassword = "";
   @property({ type: Boolean }) darkMode = true;
-  @property({ type: Boolean }) downloading = false;
   @property({ type: Object }) theme = DEFAULT_THEME;
 
   @state()
   blockTimes: number[] = []; // UTC timestamps in seconds
 
+  listeners: unknown[];
+
+  constructor() {
+    super();
+    this.listeners = [];
+  }
+
+  private pollRpc() {
+    console.log("Polling...", this.listeners);
+    this.listeners = [1];
+    setTimeout(() => {
+      console.log(this.listeners);
+    });
+  }
+
+  connectedCallback(): void {
+    super.connectedCallback();
+    this.pollRpc();
+  }
+
+  disconnectedCallback(): void {
+    super.disconnectedCallback();
+  }
+
   render() {
     return BlockClock({
-      ringWidth: this.ringWidth,
-      downloadProgress: this.downloadProgress,
-      blockHeight: this.blockHeight,
+      ringWidth: 2,
+      downloadProgress: 0,
+      blockHeight: 840_000,
       ringSegments: [],
       theme: this.theme,
-      connected: this.connected,
+      connected: false,
       darkMode: this.darkMode,
-      downloading: this.downloading,
+      downloading: false,
     });
   }
 }
