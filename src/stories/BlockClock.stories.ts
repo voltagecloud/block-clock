@@ -3,6 +3,7 @@ import type { ButtonProps } from "./Button";
 import { BlockClock, type BlockClockProps } from "../components/BlockClock";
 import { html } from "lit";
 import { DEFAULT_THEME } from "../utils/constants";
+import { StoppedReason } from "../components/NodeStopped";
 
 const getBlockClockDemo = (args: BlockClockProps) =>
   html`<div style="width: 300px; height: 300px;">${BlockClock(args)}</div>`;
@@ -18,6 +19,12 @@ const meta = {
     blockHeight: { control: { type: "range", min: 0, max: 9_999_999 } },
     connected: { control: "boolean" },
     theme: { control: "object" },
+    stoppedReason: {
+      control: {
+        type: "select",
+        options: [StoppedReason.PausedManual, StoppedReason.ErrorGeneral],
+      },
+    },
   },
   args: {
     darkMode: true,
@@ -28,6 +35,7 @@ const meta = {
     blockHeight: 840_000,
     segments: [5, 13, 21, 18, 10, 8, 5, 3, 2, 1],
     theme: DEFAULT_THEME,
+    stoppedReason: StoppedReason.PausedManual,
   },
 } satisfies Meta<BlockClockProps>;
 
@@ -52,5 +60,13 @@ export const Ready: Story = {
   args: {
     downloading: false,
     connected: true,
+  },
+};
+
+export const Stopped: Story = {
+  args: {
+    downloading: false,
+    connected: false,
+    stoppedReason: StoppedReason.PausedManual,
   },
 };

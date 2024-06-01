@@ -8,15 +8,17 @@ import { BlockClockTheme } from "../lib/types.ts";
 
 export interface NodeConnectingProps {
   theme: BlockClockTheme;
+  ringWidth: number;
 }
 
 export const NodeConnecting = ({
+  ringWidth = 2,
   theme = { colors: { blockConfirmationColors: ["yellow"] } },
 }) => {
   return html`
     ${RingLoader({
       ringFillAngle: 180, // half circle
-      ringWidth: 2,
+      ringWidth,
       theme,
     })}
     <div class="content">

@@ -5,10 +5,12 @@ import { NodeReady } from "./NodeReady.ts";
 import { NodeConnecting } from "./NodeConnecting.ts";
 import { DEFAULT_RING_WIDTH, DEFAULT_THEME } from "../utils/constants.ts";
 import { BlockClockTheme } from "../lib/types.ts";
+import { NodeStopped, StoppedReason } from "./NodeStopped.ts";
 
 export interface BlockClockProps {
   ringWidth: number;
   downloadProgress: number;
+  stoppedReason: StoppedReason | undefined;
   blockHeight: number;
   segments: number[];
   connected: boolean;
@@ -17,9 +19,32 @@ export interface BlockClockProps {
   theme: BlockClockTheme;
 }
 
+function getClock(
+  connected: boolean,
+  downloading: boolean,
+  stoppedReason: StoppedReason | undefined,
+  theme: BlockClockTheme,
+  downloadProgress: number,
+  blockHeight: number,
+  ringWidth: number,
+  segments: number[]
+) {
+  switch (true) {
+    case stoppedReason !== undefined:
+      return NodeStopped({ stoppedReason, ringWidth });
+    case !connected:
+      return NodeConnecting({ theme, ringWidth });
+    case downloading:
+      return NodeDownloading({ downloadProgress, ringWidth });
+    default:
+      return NodeReady({ blockHeight, ringWidth, segments, theme });
+  }
+}
+
 export const BlockClock = ({
   ringWidth = DEFAULT_RING_WIDTH,
   downloadProgress = 0,
+  stoppedReason = undefined,
   blockHeight = 0,
   connected = false,
   darkMode = true,
@@ -29,11 +54,16 @@ export const BlockClock = ({
 }: BlockClockProps) => {
   const baseClass = { circle: true, dark: darkMode };
 
-  const clock = connected
-    ? downloading
-      ? NodeDownloading({ downloadProgress })
-      : NodeReady({ blockHeight, ringWidth, segments, theme })
-    : NodeConnecting({ theme });
+  const clock = getClock(
+    connected,
+    downloading,
+    stoppedReason,
+    theme,
+    downloadProgress,
+    blockHeight,
+    ringWidth,
+    segments
+  );
 
   return html`
     <div class=${classMap(baseClass)}>${clock}</div>
