@@ -9,7 +9,7 @@ export interface RingLoaderProps {
 }
 
 export const RingLoader = ({
-  ringFillAngle = 0,
+  ringFillAngle = 180,
   ringWidth,
 }: RingLoaderProps) => {
   const animatedStyle = {
@@ -56,6 +56,12 @@ export const RingLoader = ({
       style="${styleMap(ringStyle)}"
       viewBox="0 0 100 100"
     >
+      <defs>
+        <linearGradient id="fadeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:yellow;stop-opacity:0" />
+          <stop offset="100%" style="stop-color:yellow;stop-opacity:1" />
+        </linearGradient>
+      </defs>
       <path
         style="${styleMap(animatedStyle)}"
         d="
@@ -67,9 +73,8 @@ export const RingLoader = ({
             0 a ${50 - ringWidth / 2},
             ${50 - ringWidth / 2} 0 1,1 -${2 * (50 - ringWidth / 2)},
             0"
-        stroke="yellow"
+        stroke="url(#fadeGradient)"
         stroke-width="${ringWidth}"
-        fill="none"
         stroke-linecap="round"
       />
     </svg>

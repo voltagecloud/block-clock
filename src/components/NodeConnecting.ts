@@ -8,7 +8,7 @@ import { RingLoader } from "./RingLoader.ts";
 export const NodeConnecting = () => {
   return html`
     ${RingLoader({
-      ringFillAngle: 0,
+      ringFillAngle: 180, // half circle
       ringWidth: 2,
     })}
     <div class="content">
