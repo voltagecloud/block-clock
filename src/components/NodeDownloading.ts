@@ -1,6 +1,6 @@
 import { html } from "lit";
 import { Ring } from "./Ring.ts";
-import { BitcoinLogo } from "./BitcoinLogo.ts";
+import { Logo, LogoType } from "./Logo.ts";
 import { Title } from "./Title.ts";
 import { Subtitle } from "./Subtitle.ts";
 import { Indicator } from "./Indicator.ts";
@@ -20,7 +20,7 @@ export const NodeDownloading = ({
       ringWidth,
     })}
     <div class="content">
-      ${BitcoinLogo()} ${Title({ text: "Downloading" })}
+      ${Logo({ logo: LogoType.Bitcoin })} ${Title({ text: "Downloading" })}
       ${Subtitle({ text: "Please wait..." })} ${Indicator()}
     </div>
   `;

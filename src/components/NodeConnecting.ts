@@ -1,5 +1,5 @@
 import { html } from "lit";
-import { BitcoinLogo } from "./BitcoinLogo.ts";
+import { Logo, LogoType } from "./Logo.ts";
 import { Title } from "./Title.ts";
 import { Subtitle } from "./Subtitle.ts";
 import { Indicator } from "./Indicator.ts";
@@ -22,7 +22,7 @@ export const NodeConnecting = ({
       theme,
     })}
     <div class="content">
-      ${BitcoinLogo()} ${Title({ text: "Connecting" })}
+      ${Logo({ logo: LogoType.Bitcoin })} ${Title({ text: "Connecting" })}
       ${Subtitle({ text: "Please wait..." })} ${Indicator()}
     </div>
   `;

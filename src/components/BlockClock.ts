@@ -6,6 +6,7 @@ import { NodeConnecting } from "./NodeConnecting.ts";
 import { DEFAULT_RING_WIDTH, DEFAULT_THEME } from "../utils/constants.ts";
 import { BlockClockTheme } from "../lib/types.ts";
 import { NodeStopped, StoppedReason } from "./NodeStopped.ts";
+import { LogoType } from "./Logo.ts";
 
 export interface BlockClockProps {
   ringWidth: number;
@@ -17,6 +18,19 @@ export interface BlockClockProps {
   darkMode: boolean;
   downloading: boolean;
   theme: BlockClockTheme;
+}
+
+function getLogoTypeFromStoppedReason(stoppedReason: StoppedReason) {
+  switch (stoppedReason) {
+    case StoppedReason.ErrorGeneral:
+      return LogoType.Stop;
+    case StoppedReason.ErrorSystemClock:
+      return LogoType.Stop;
+    case StoppedReason.PausedNoWifi:
+      return LogoType.NoWifi;
+    default:
+      return LogoType.Paused;
+  }
 }
 
 function getClock(
@@ -31,7 +45,11 @@ function getClock(
 ) {
   switch (true) {
     case stoppedReason !== undefined:
-      return NodeStopped({ stoppedReason, ringWidth });
+      return NodeStopped({
+        stoppedReason,
+        ringWidth,
+        logo: getLogoTypeFromStoppedReason(stoppedReason),
+      });
     case !connected:
       return NodeConnecting({ theme, ringWidth });
     case downloading:

@@ -1,5 +1,5 @@
 import { html } from "lit";
-import { BitcoinLogo } from "./BitcoinLogo.ts";
+import { Logo, LogoType } from "./Logo.ts";
 import { Title } from "./Title.ts";
 import { Subtitle } from "./Subtitle.ts";
 import { Indicator } from "./Indicator.ts";
@@ -16,9 +16,14 @@ export enum StoppedReason {
 interface NodeStoppedProps {
   stoppedReason: StoppedReason;
   ringWidth: number;
+  logo: LogoType;
 }
 
-export const NodeStopped = ({ stoppedReason, ringWidth }: NodeStoppedProps) => {
+export const NodeStopped = ({
+  stoppedReason,
+  ringWidth,
+  logo,
+}: NodeStoppedProps) => {
   const titleText =
     stoppedReason === StoppedReason.ErrorGeneral ||
     stoppedReason === StoppedReason.ErrorSystemClock
@@ -27,7 +32,7 @@ export const NodeStopped = ({ stoppedReason, ringWidth }: NodeStoppedProps) => {
   return html`
     ${RingTrack({ ringWidth, size: 1 })}
     <div class="content">
-      ${BitcoinLogo()} ${Title({ text: titleText })}
+      ${Logo({ logo })} ${Title({ text: titleText })}
       ${Subtitle({ text: stoppedReason })} ${Indicator()}
     </div>
   `;
