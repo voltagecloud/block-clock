@@ -59,8 +59,7 @@ function segmentsToArcs(segments: number[]) {
 function getBlockConfirmationColor(theme: BlockClockTheme, index: number) {
   return (
     theme.colors.blockConfirmationColors[index] ||
-    theme.colors.blockConfirmationColors[
-      theme.colors.blockConfirmationColors.length
-    ]
+    theme.colors.blockConfirmationColors.at(-1) || // Fallback to last color
+    "yellow" // or our default theme
   );
 }

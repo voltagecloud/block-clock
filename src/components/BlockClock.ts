@@ -33,7 +33,7 @@ export const BlockClock = ({
     ? downloading
       ? NodeDownloading({ downloadProgress })
       : NodeReady({ blockHeight, ringWidth, segments, theme })
-    : NodeConnecting();
+    : NodeConnecting({ theme });
 
   return html`
     <div class=${classMap(baseClass)}>${clock}</div>

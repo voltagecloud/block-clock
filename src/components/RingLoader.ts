@@ -2,15 +2,18 @@ import { css, html } from "lit";
 import { RingTrack } from "./RingTrack";
 import { styleMap } from "lit/directives/style-map.js";
 import { calculateDashArray } from "../utils/svg";
+import { BlockClockTheme } from "../lib/types";
 
 export interface RingLoaderProps {
   ringWidth: number;
   ringFillAngle: number;
+  theme: BlockClockTheme;
 }
 
 export const RingLoader = ({
   ringFillAngle = 180,
   ringWidth,
+  theme,
 }: RingLoaderProps) => {
   const animatedStyle = {
     transition: "stroke-dasharray 1s ease-in-out",
@@ -46,6 +49,8 @@ export const RingLoader = ({
     }
   `;
 
+  const themeColor = theme.colors.blockConfirmationColors?.at(-1) || "yellow";
+
   return html`
     <style>
       ${styles}
@@ -58,8 +63,8 @@ export const RingLoader = ({
     >
       <defs>
         <linearGradient id="fadeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" style="stop-color:yellow;stop-opacity:0" />
-          <stop offset="100%" style="stop-color:yellow;stop-opacity:1" />
+          <stop offset="0%" style="$stop-color:${themeColor};stop-opacity:0" />
+          <stop offset="100%" style="stop-color:${themeColor};stop-opacity:1" />
         </linearGradient>
       </defs>
       <path
