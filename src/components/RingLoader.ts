@@ -27,19 +27,17 @@ export const RingLoader = ({
     top: "0",
     left: "0",
     zIndex: 1,
-    transform: "rotate(90deg)",
     background: "transparent",
     animation: "rotate 2s linear infinite",
     "transform-origin": "center",
   };
-
   const styles = css`
     @keyframes rotate {
       from {
-        transform: rotate(0deg);
+        transform: rotate(-90deg);
       }
       to {
-        transform: rotate(360deg);
+        transform: rotate(280deg);
       }
     }
 
@@ -81,6 +79,7 @@ export const RingLoader = ({
         stroke="url(#fadeGradient)"
         stroke-width="${ringWidth}"
         stroke-linecap="round"
+        fill="none"
       />
     </svg>
   `;
