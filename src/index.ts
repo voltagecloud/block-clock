@@ -1,9 +1,10 @@
 import { LitElement, unsafeCSS } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { BlockClock } from "./components/BlockClock";
-import { DEFAULT_RING_WIDTH, DEFAULT_THEME } from "./utils/constants";
+import { DEFAULT_THEME } from "./utils/constants";
 import style from "./index.css?inline";
 import { getBlockStats, getBlockchainInfo } from "./lib/api/api";
+import { StoppedReason } from "./components/NodeStopped";
 
 @customElement("block-clock")
 export class Index extends LitElement {
@@ -19,6 +20,8 @@ export class Index extends LitElement {
   @property({ type: String }) rpcPassword = "";
   @property({ type: Boolean }) darkMode = true;
   @property({ type: Object }) theme = DEFAULT_THEME;
+  @property({ type: Boolean }) downloading = false;
+  @property({ type: String }) stoppedReason?: StoppedReason | undefined;
 
   @state() hasConnected: boolean = false;
   @state() blockTimes: number[] = []; // UTC timestamps in seconds
@@ -115,7 +118,8 @@ export class Index extends LitElement {
       theme: this.theme,
       connected: this.hasConnected,
       darkMode: this.darkMode,
-      downloading: false,
+      downloading: this.downloading,
+      stoppedReason: this.stoppedReason,
     });
   }
 }

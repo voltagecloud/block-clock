@@ -31,8 +31,8 @@ export const Ring = ({ ringFillAngle = 0, ringWidth }: RingProps) => {
             0"
         stroke="yellow"
         stroke-width="${ringWidth}"
-        fill="none"
         stroke-linecap="round"
+        fill="none"
       />
     </svg>
   `;
