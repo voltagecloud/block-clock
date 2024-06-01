@@ -8,7 +8,7 @@ import { RingTrack } from "./RingTrack.ts";
 export enum StoppedReason {
   PausedNoWifi = "No wifi",
   PausedNotPluggedIn = "Not plugged in",
-  PausedManual = "Paused",
+  PausedManual = "Tap to resume",
   ErrorSystemClock = "System clock",
   ErrorGeneral = "Tap for details",
 }

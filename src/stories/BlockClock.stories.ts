@@ -20,10 +20,8 @@ const meta = {
     connected: { control: "boolean" },
     theme: { control: "object" },
     stoppedReason: {
-      control: {
-        type: "select",
-        options: [StoppedReason.PausedManual, StoppedReason.ErrorGeneral],
-      },
+      control: "select",
+      options: Object.values(StoppedReason),
     },
   },
   args: {
@@ -35,7 +33,7 @@ const meta = {
     blockHeight: 840_000,
     segments: [5, 13, 21, 18, 10, 8, 5, 3, 2, 1],
     theme: DEFAULT_THEME,
-    stoppedReason: StoppedReason.PausedManual,
+    stoppedReason: undefined,
   },
 } satisfies Meta<BlockClockProps>;
 
