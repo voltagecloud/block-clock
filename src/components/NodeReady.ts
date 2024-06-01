@@ -1,5 +1,5 @@
 import { html } from "lit";
-import { BitcoinLogo } from "./BitcoinLogo.ts";
+import { Logo, LogoType } from "./Logo.ts";
 import { Title } from "./Title.ts";
 import { Subtitle } from "./Subtitle.ts";
 import { Indicator } from "./Indicator.ts";
@@ -24,7 +24,8 @@ export const NodeReady = ({
   return html`
     ${RingSegmented({ ringWidth, ringSegments, theme })}
     <div class="content">
-      ${BitcoinLogo()} ${Title({ text: numberWithCommas(blockHeight) })}
+      ${Logo({ logo: LogoType.Bitcoin })}
+      ${Title({ text: numberWithCommas(blockHeight) })}
       ${Subtitle({ text: "Blocktime" })} ${Indicator()}
     </div>
   `;

@@ -3,6 +3,7 @@ import { customElement, property, state } from "lit/decorators.js";
 import { BlockClock } from "./components/BlockClock";
 import { DEFAULT_RING_WIDTH, DEFAULT_THEME } from "./utils/constants";
 import style from "./index.css?inline";
+import { StoppedReason } from "./components/NodeStopped";
 
 @customElement("block-clock")
 export class Index extends LitElement {
@@ -20,6 +21,8 @@ export class Index extends LitElement {
   @property({ type: Boolean }) darkMode = true;
   @property({ type: Boolean }) downloading = false;
   @property({ type: Object }) theme = DEFAULT_THEME;
+  @property({ type: String }) stoppedReason?: StoppedReason | undefined =
+    undefined;
 
   @state()
   blockTimes: number[] = []; // UTC timestamps in seconds
@@ -34,6 +37,7 @@ export class Index extends LitElement {
       connected: this.connected,
       darkMode: this.darkMode,
       downloading: this.downloading,
+      stoppedReason: this.stoppedReason,
     });
   }
 }
