@@ -1,13 +1,13 @@
 import { html } from "lit";
-import { Ring } from "./Ring.ts";
 import { BitcoinLogo } from "./BitcoinLogo.ts";
 import { Title } from "./Title.ts";
 import { Subtitle } from "./Subtitle.ts";
 import { Indicator } from "./Indicator.ts";
+import { RingLoader } from "./RingLoader.ts";
 
 export const NodeConnecting = () => {
   return html`
-    ${Ring({
+    ${RingLoader({
       ringFillAngle: 0,
       ringWidth: 2,
     })}
