@@ -24,9 +24,9 @@ export class Index extends LitElement {
   @property({ type: String }) stoppedReason?: StoppedReason | undefined;
 
   @state() hasConnected: boolean = false;
-  @state() blockTimes: number[] = []; // UTC timestamps in seconds
   @state() blockHeight: number = 0;
   @state() zeroHourBlocks: ZeroHourBlock[] = [];
+  @state() zeroHourBlockTimeSegments: number[] = [];
 
   listeners: unknown[];
 
@@ -54,12 +54,11 @@ export class Index extends LitElement {
       let currentBlockHeight = latestBlockHeight;
       let currentMedianTime = latestMedianTime * 1000;
       let count = 0;
-      console.log({ currentMedianTime, zeroHourTimestamp });
-      while (currentMedianTime > zeroHourTimestamp) {
+      while (currentMedianTime > zeroHourTimestamp && currentBlockHeight > 0) {
         try {
           const blockStats = await getBlockStats({
             hashOrHeight: currentBlockHeight,
-            stats: ["mediantime", "blockhash", "height", "time"],
+            stats: ["blockhash", "height", "time"],
           });
           pushFn({
             height: blockStats.height as number,
@@ -91,7 +90,24 @@ export class Index extends LitElement {
         latestBlockHeight: info.blocks as number,
         latestMedianTime: info.time as number,
         pushFn: (block) => {
-          this.zeroHourBlocks = [...this.zeroHourBlocks, block];
+          // Build the segments
+          if (this.zeroHourBlockTimeSegments.length > 0) {
+            const earliestBlockTime = this.zeroHourBlocks[0].time;
+            const diff = earliestBlockTime - block.time;
+            const radialAngle = calculateRadialAngle(diff);
+            this.zeroHourBlockTimeSegments = [
+              radialAngle,
+              ...this.zeroHourBlockTimeSegments,
+            ];
+          } else {
+            // Calculate the time difference between the latest zero hour block and now
+            const now = Math.floor(new Date().getTime() / 1000);
+            const diff = now - block.time;
+            const radialAngle = calculateRadialAngle(diff);
+            this.zeroHourBlockTimeSegments = [radialAngle];
+          }
+          // Add the block to the list of zero hour blocks in reverse order
+          this.zeroHourBlocks = [block, ...this.zeroHourBlocks];
         },
       });
     } catch (e) {
@@ -109,12 +125,12 @@ export class Index extends LitElement {
   }
 
   render() {
-    console.log(this.zeroHourBlocks);
+    console.log(this.zeroHourBlockTimeSegments);
     return BlockClock({
       ringWidth: 2,
       downloadProgress: 0,
       blockHeight: this.blockHeight,
-      ringSegments: [],
+      ringSegments: this.zeroHourBlockTimeSegments,
       theme: this.theme,
       connected: this.hasConnected,
       darkMode: this.darkMode,
@@ -146,4 +162,8 @@ function getMidnightOrMiddayTimestamp() {
   return now.getTime() - now.getTimezoneOffset() * 60 * 1000 < midday.getTime()
     ? midnight.getTime()
     : midday.getTime();
+}
+
+function calculateRadialAngle(seconds: number) {
+  return (seconds * 360) / (12 * 60 * 60);
 }
