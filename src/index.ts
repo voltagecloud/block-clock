@@ -27,7 +27,7 @@ export class Index extends LitElement {
       ringWidth: this.ringWidth,
       downloadProgress: this.downloadProgress,
       blockHeight: this.blockHeight,
-      blockTimes: this.blockTimes,
+      segments: this.blockTimes,
       theme: this.theme,
       connected: this.connected,
       darkMode: this.darkMode,
