@@ -125,7 +125,6 @@ export class Index extends LitElement {
   }
 
   render() {
-    console.log(this.zeroHourBlockTimeSegments);
     return BlockClock({
       ringWidth: 2,
       downloadProgress: 0,
@@ -151,6 +150,16 @@ type ZeroHourBlock = {
   hash: string;
   time: number;
 };
+
+// This is temporarily here for debugging purposes because if your local time just past
+// the midnight or midday mark, none or almost no blocks will be fetched to display the
+// block time ring segments.
+function get11HoursAgoTimestamp() {
+  const now = new Date();
+  const twelveHoursAgo = new Date(now);
+  twelveHoursAgo.setHours(now.getHours() - 11);
+  return twelveHoursAgo.getTime();
+}
 
 // This function returns the timestamp of the latest midday or midnight before the current time
 function getMidnightOrMiddayTimestamp() {
