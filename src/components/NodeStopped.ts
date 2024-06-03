@@ -14,13 +14,13 @@ export enum StoppedReason {
 }
 
 interface NodeStoppedProps {
-  stoppedReason: StoppedReason;
+  stoppedReason: StoppedReason | undefined;
   ringWidth: number;
-  logo: LogoType;
+  logo: LogoType | undefined;
 }
 
 export const NodeStopped = ({
-  stoppedReason,
+  stoppedReason = undefined,
   ringWidth,
   logo,
 }: NodeStoppedProps) => {
@@ -32,7 +32,7 @@ export const NodeStopped = ({
   return html`
     ${RingTrack({ ringWidth, size: 1 })}
     <div class="content">
-      ${Logo({ logo })} ${Title({ text: titleText })}
+      ${logo && Logo({ logo })} ${Title({ text: titleText })}
       ${Subtitle({ text: stoppedReason })} ${Indicator()}
     </div>
   `;

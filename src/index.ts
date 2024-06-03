@@ -1,6 +1,6 @@
 import { LitElement, unsafeCSS } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import { BlockClock } from "./components/BlockClock";
+import { BlockClock, BlockClockState } from "./components/BlockClock";
 import { DEFAULT_THEME } from "./utils/constants";
 import style from "./index.css?inline";
 import { getBlockStats, getBlockchainInfo } from "./lib/api/api";
@@ -21,18 +21,35 @@ export class Index extends LitElement {
   @property({ type: Boolean }) darkMode = true;
   @property({ type: Object }) theme = DEFAULT_THEME;
   @property({ type: Boolean }) downloading = false;
-  @property({ type: String }) stoppedReason?: StoppedReason | undefined;
+  @property({ type: String }) stoppedReason?: StoppedReason = undefined;
 
   @state() hasConnected: boolean = false;
   @state() blockHeight: number = 0;
   @state() zeroHourBlocks: ZeroHourBlock[] = [];
   @state() zeroHourBlockTimeSegments: number[] = [];
+  @state() zeroHourBlocksLoading: boolean = false;
 
   listeners: unknown[];
 
   constructor() {
     super();
     this.listeners = [];
+  }
+
+  private getBlockState(): BlockClockState {
+    if (this.zeroHourBlocksLoading) {
+      return BlockClockState.LoadingBlocks;
+    }
+    if (this.downloading) {
+      return BlockClockState.Downloading;
+    }
+    if (this.stoppedReason) {
+      return BlockClockState.Stopped;
+    }
+    if (!this.hasConnected) {
+      return BlockClockState.Connecting;
+    }
+    return BlockClockState.Ready;
   }
 
   private async loadZeroHourBlocks({
@@ -44,6 +61,7 @@ export class Index extends LitElement {
     latestMedianTime: number;
     pushFn: (block: ZeroHourBlock) => void;
   }): Promise<ZeroHourBlock[]> {
+    this.zeroHourBlocksLoading = true;
     const zeroHourTimestamp = getMidnightOrMiddayTimestamp();
     return new Promise(async (resolve, reject) => {
       const blocks: {
@@ -72,6 +90,7 @@ export class Index extends LitElement {
           return reject(e);
         }
       }
+      this.zeroHourBlocksLoading = false;
       resolve(blocks);
     });
   }
@@ -126,14 +145,13 @@ export class Index extends LitElement {
 
   render() {
     return BlockClock({
+      state: this.getBlockState(),
       ringWidth: 2,
       downloadProgress: 0,
       blockHeight: this.blockHeight,
       ringSegments: this.zeroHourBlockTimeSegments,
       theme: this.theme,
-      connected: this.hasConnected,
       darkMode: this.darkMode,
-      downloading: this.downloading,
       stoppedReason: this.stoppedReason,
     });
   }

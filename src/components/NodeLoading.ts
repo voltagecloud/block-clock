@@ -6,15 +6,19 @@ import { Indicator } from "./Indicator.ts";
 import { RingLoader } from "./RingLoader.ts";
 import { BlockClockTheme } from "../lib/types.ts";
 
-export interface NodeConnectingProps {
+export interface NodeLoadingProps {
   theme: BlockClockTheme;
   ringWidth: number;
+  title: string;
+  subtitle: string;
 }
 
-export const NodeConnecting = ({
+export const NodeLoading = ({
+  title,
+  subtitle,
   ringWidth = 2,
   theme = { colors: { blockConfirmationColors: ["yellow"] } },
-}) => {
+}: NodeLoadingProps) => {
   return html`
     ${RingLoader({
       ringFillAngle: 180, // half circle
@@ -22,8 +26,8 @@ export const NodeConnecting = ({
       theme,
     })}
     <div class="content">
-      ${Logo({ logo: LogoType.Bitcoin })} ${Title({ text: "Connecting" })}
-      ${Subtitle({ text: "Please wait..." })} ${Indicator()}
+      ${Logo({ logo: LogoType.Bitcoin })} ${Title({ text: title })}
+      ${Subtitle({ text: subtitle })} ${Indicator()}
     </div>
   `;
 };

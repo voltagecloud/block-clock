@@ -2,7 +2,7 @@ import { html } from "lit";
 import { styleMap } from "lit/directives/style-map.js";
 
 export interface SubtitleProps {
-  text: string;
+  text?: string;
 }
 
 export const Subtitle = ({ text }: SubtitleProps) => {
