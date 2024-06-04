@@ -3,8 +3,8 @@ import { customElement, property, state } from "lit/decorators.js";
 import { BlockClock, BlockClockState } from "./components/BlockClock";
 import { DEFAULT_THEME } from "./utils/constants";
 import style from "./index.css?inline";
-import { StoppedReason } from "./components/NodeStopped";
 import { BitcoinRpc } from "./lib/api/api";
+import { StoppedReason } from "./lib/types";
 
 @customElement("block-clock")
 export class Index extends LitElement {
@@ -191,12 +191,12 @@ type ZeroHourBlock = {
 // This is temporarily here for debugging purposes because if your local time just past
 // the midnight or midday mark, none or almost no blocks will be fetched to display the
 // block time ring segments.
-function get11HoursAgoTimestamp() {
-  const now = new Date();
-  const twelveHoursAgo = new Date(now);
-  twelveHoursAgo.setHours(now.getHours() - 11);
-  return twelveHoursAgo.getTime();
-}
+// function get11HoursAgoTimestamp() {
+//   const now = new Date();
+//   const twelveHoursAgo = new Date(now);
+//   twelveHoursAgo.setHours(now.getHours() - 11);
+//   return twelveHoursAgo.getTime();
+// }
 
 // This function returns the timestamp of the latest midday or midnight before the current time
 function getMidnightOrMiddayTimestamp() {

@@ -18,5 +18,5 @@ export const IndicatorLoading = () => {
 const wrapperStyle = {
   display: "flex",
   "align-items": "center",
-  gap: "2cqi",
+  gap: "1cqi",
 };

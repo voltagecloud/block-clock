@@ -1,5 +1,4 @@
 import { svg } from "lit";
-import { RingTrack } from "./RingTrack";
 import { styleMap } from "lit/directives/style-map.js";
 import { RingSegment } from "./RingSegment";
 import { DEFAULT_RING_WIDTH } from "../utils/constants";
@@ -21,7 +20,6 @@ export const RingSegmented = ({
   // Function to transform ringSegments into start and end angles
 
   return svg`
-    ${RingTrack({ ringWidth, size: 1 })}
     <svg style="${styleMap(ringStyle)}" class="ring" viewBox="0 0 100 100">
       ${arcs.map(({ start, end }, i) => {
         const indexFromLast = arcs.length - i - 1;

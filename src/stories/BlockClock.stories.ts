@@ -6,7 +6,7 @@ import {
 } from "../components/BlockClock";
 import { html } from "lit";
 import { DEFAULT_THEME } from "../utils/constants";
-import { StoppedReason } from "../components/NodeStopped";
+import { StoppedReason } from "../lib/types";
 
 const getBlockClockDemo = (args: BlockClockProps) =>
   html`<div style="width: 300px; height: 300px;">${BlockClock(args)}</div>`;

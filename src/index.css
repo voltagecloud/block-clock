@@ -10,28 +10,6 @@ html,
   text-align: left;
 }
 
-#wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: var(--bg-color, black);
-  max-height: 100%;
-  border-radius: 50%;
-  aspect-ratio: 1/1;
-  container-type: inline-size;
-}
-
-#wrapper > * {
-  z-index: 2;
-}
-
-#wrapper > .content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2cqi;
-}
-
 /** Theme */
 :root {
   --title-text-color: #333;

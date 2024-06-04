@@ -3,7 +3,6 @@ import { styleMap } from "lit/directives/style-map.js";
 import { IndicatorDot } from "./IndicatorDot";
 
 export const Indicator = () => {
-  const animate = true;
   return html`
     <div style=${styleMap(wrapperStyle)}>
       ${IndicatorDot()} ${IndicatorDot()} ${IndicatorDot()} ${IndicatorDot()}

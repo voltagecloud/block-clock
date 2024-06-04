@@ -1,11 +1,13 @@
 import { html } from "lit";
-import { classMap } from "lit/directives/class-map.js";
-import { NodeDownloading } from "./NodeDownloading.ts";
-import { NodeReady } from "./NodeReady.ts";
-import { NodeLoading } from "./NodeLoading.ts";
-import { BlockClockTheme } from "../lib/types.ts";
-import { NodeStopped, StoppedReason } from "./NodeStopped.ts";
-import { LogoType } from "./Logo.ts";
+import { BlockClockTheme, StoppedReason } from "../lib/types.ts";
+import { Logo, LogoType } from "./Logo.ts";
+import { BlockClockFrame } from "./BlockClockFrame.ts";
+import { Title } from "./Title.ts";
+import { Subtitle } from "./Subtitle.ts";
+import { IndicatorLoading } from "./IndicatorLoading.ts";
+import { Ring } from "./Ring.ts";
+import { RingSegmented } from "./RingSegmented.ts";
+import { numberWithCommas } from "../utils/format.ts";
 
 export enum BlockClockState {
   Connecting = "Connecting",
@@ -49,38 +51,60 @@ function getClock({
   blockHeight,
   ringSegments,
   state,
-}: Omit<BlockClockProps, "darkMode">) {
+  darkMode,
+}: BlockClockProps) {
   switch (state) {
     case BlockClockState.Stopped:
-      return NodeStopped({
-        stoppedReason,
+      return BlockClockFrame({
         ringWidth,
-        logo: getLogoTypeFromStoppedReason(stoppedReason),
+        top: Logo({ logo: getLogoTypeFromStoppedReason(stoppedReason) }),
+        middle: Title({ text: "Stopped" }),
+        lowerMiddle: Subtitle({ text: stoppedReason }),
+        bottom: IndicatorLoading(),
+        darkMode,
       });
     case BlockClockState.Connecting:
-      return NodeLoading({
-        title: "Connecting",
-        subtitle: "Please wait",
-        theme,
+      return BlockClockFrame({
         ringWidth,
+        top: Logo({ logo: LogoType.Bitcoin }),
+        middle: Title({ text: "Connecting" }),
+        lowerMiddle: Subtitle({ text: "Please Wait" }),
+        bottom: IndicatorLoading(),
+        darkMode,
       });
     case BlockClockState.LoadingBlocks:
-      return NodeLoading({
-        title: "Loading Blocks",
-        subtitle: "Please wait",
-        theme,
+      return BlockClockFrame({
         ringWidth,
+        top: Logo({ logo: LogoType.Bitcoin }),
+        middle: Title({ text: "Loading Blocks" }),
+        lowerMiddle: Subtitle({ text: "Please Wait" }),
+        bottom: IndicatorLoading(),
+        darkMode,
       });
     case BlockClockState.Downloading:
-      return NodeDownloading({ downloadProgress, ringWidth });
+      return BlockClockFrame({
+        ringWidth,
+        ring: Ring({ ringFillAngle: downloadProgress * 3.6, ringWidth }),
+        top: Logo({ logo: LogoType.Bitcoin }),
+        middle: Title({ text: "Downloading" }),
+        lowerMiddle: Subtitle({ text: "Please Wait" }),
+        bottom: IndicatorLoading(),
+        darkMode,
+      });
     default:
-      return NodeReady({ blockHeight, ringWidth, ringSegments, theme });
+      return BlockClockFrame({
+        ringWidth,
+        ring: RingSegmented({ ringWidth, ringSegments, theme }),
+        top: Logo({ logo: LogoType.Bitcoin }),
+        middle: Title({ text: numberWithCommas(blockHeight), scale: 1.2 }),
+        lowerMiddle: Subtitle({ text: `Blocktime` }),
+        bottom: IndicatorLoading(),
+        darkMode,
+      });
   }
 }
 
 export const BlockClock = (props: BlockClockProps) => {
   const clock = getClock(props);
-  return html`<div id="wrapper" class=${classMap({ dark: props.darkMode })}>
-    ${clock}
-  </div>`;
+  return html`${clock}`;
 };
