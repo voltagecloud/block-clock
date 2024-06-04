@@ -10,7 +10,7 @@ export const DEFAULT_THEME: BlockClockTheme = {
       "#EE8847", // orange
       "#EFA149",
       "#EFBA47",
-      "#F1D549", // yellow
+      "yellow", // yellow
     ],
   },
 };

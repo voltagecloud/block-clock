@@ -3,8 +3,8 @@ import { customElement, property, state } from "lit/decorators.js";
 import { BlockClock, BlockClockState } from "./components/BlockClock";
 import { DEFAULT_THEME } from "./utils/constants";
 import style from "./index.css?inline";
-import { getBlockStats, getBlockchainInfo } from "./lib/api/api";
 import { StoppedReason } from "./components/NodeStopped";
+import { BitcoinRpc } from "./lib/api/api";
 
 @customElement("block-clock")
 export class Index extends LitElement {
@@ -30,6 +30,7 @@ export class Index extends LitElement {
   @state() zeroHourBlocksLoading: boolean = false;
 
   listeners: unknown[];
+  bitcoind: BitcoinRpc | undefined;
 
   constructor() {
     super();
@@ -74,7 +75,12 @@ export class Index extends LitElement {
       let count = 0;
       while (currentMedianTime > zeroHourTimestamp && currentBlockHeight > 0) {
         try {
-          const blockStats = await getBlockStats({
+          if (!this.bitcoind) {
+            throw new Error(
+              "Bitcoind not initialized. Please set the RPC variables."
+            );
+          }
+          const blockStats = await this.bitcoind.getBlockStats({
             hashOrHeight: currentBlockHeight,
             stats: ["blockhash", "height", "time"],
           });
@@ -102,7 +108,12 @@ export class Index extends LitElement {
       console.log(this.listeners);
     });
     try {
-      const info = await getBlockchainInfo();
+      if (!this.bitcoind) {
+        throw new Error(
+          "Bitcoind not initialized. Please set the RPC variables."
+        );
+      }
+      const info = await this.bitcoind.getBlockchainInfo();
       this.hasConnected = true;
       this.blockHeight = info.blocks;
       this.loadZeroHourBlocks({
@@ -135,6 +146,14 @@ export class Index extends LitElement {
   }
 
   connectedCallback(): void {
+    if (!this.rpcEndpoint || !this.rpcUser || !this.rpcPassword) {
+      throw new Error("Missing required RPC variables");
+    }
+    this.bitcoind = new BitcoinRpc(
+      this.rpcUser,
+      this.rpcPassword,
+      this.rpcEndpoint
+    );
     super.connectedCallback();
     this.pollRpc();
   }
