@@ -152,8 +152,7 @@ export class Index extends LitElement {
       },
     });
     this.blockClockActor.subscribe((snapshot) => {
-      // Debug
-      console.log("BlockClock snapshot", snapshot);
+      console.log("BlockClock snapshot", snapshot); // DEBUG
       this.blockClockState = snapshot.value as BlockClockState;
     });
     this.blockClockActor.start();

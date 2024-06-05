@@ -65,6 +65,33 @@ export const machine = setup({
     },
     [BlockClockState.WaitingIBD]: {
       entry: ["updateInfo"],
+      initial: "Poll",
+      states: {
+        Poll: {
+          invoke: {
+            input: ({ context }) => context,
+            onDone: [
+              {
+                target: "Poll Success",
+                guard: {
+                  type: "isIBD",
+                },
+              },
+              {
+                target: "#BlockClock.Block Time",
+              },
+            ],
+            src: "fetchBlockchainInfo",
+          },
+        },
+        "Poll Success": {
+          after: {
+            "2000": {
+              target: "Poll",
+            },
+          },
+        },
+      },
     },
     [BlockClockState.BlockTime]: {},
   },
