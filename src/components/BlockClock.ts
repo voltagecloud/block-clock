@@ -15,7 +15,7 @@ export interface BlockClockProps {
   ringWidth: number;
   downloadProgress: number;
   stoppedReason?: StoppedReason;
-  blockHeight: number;
+  blockHeight: number | undefined;
   ringSegments: number[];
   darkMode: boolean;
   theme: BlockClockTheme;

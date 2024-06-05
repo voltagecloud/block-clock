@@ -1,4 +1,4 @@
-import { fromPromise, setup } from "xstate";
+import { assign, fromPromise, setup } from "xstate";
 import { getBlockchainInfo } from "../lib/api/api.new";
 import { RpcConfig } from "./types";
 import { GetBlockchainInfoResponse } from "../lib/api/types";
@@ -21,13 +21,16 @@ export enum BlockClockState {
 
 export const machine = setup({
   types: {
-    context: {} as RpcConfig,
+    context: {} as RpcConfig & { blockHeight: number | undefined },
     input: {} as RpcConfig,
   },
   actions: {
-    updateInfo: function ({ context, event }) {
-      console.log("updateInfo", event);
-    },
+    updateInfo: assign(({ event }) => {
+      const info = event.output as GetBlockchainInfoResponse;
+      return {
+        blockHeight: info.blocks,
+      };
+    }),
   },
   actors: {
     fetchBlockchainInfo,
@@ -39,7 +42,7 @@ export const machine = setup({
     },
   },
 }).createMachine({
-  context: ({ input }) => input,
+  context: ({ input }) => ({ ...input, blockHeight: undefined }),
   id: "BlockClock",
   initial: BlockClockState.Connecting,
   states: {
@@ -64,7 +67,6 @@ export const machine = setup({
       },
     },
     [BlockClockState.WaitingIBD]: {
-      entry: ["updateInfo"],
       initial: "Poll",
       states: {
         Poll: {
@@ -93,6 +95,8 @@ export const machine = setup({
         },
       },
     },
-    [BlockClockState.BlockTime]: {},
+    [BlockClockState.BlockTime]: {
+      entry: "updateInfo",
+    },
   },
 });

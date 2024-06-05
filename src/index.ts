@@ -35,7 +35,7 @@ export class Index extends LitElement {
   @property({ type: String }) stoppedReason?: StoppedReason = undefined;
 
   @state() hasConnected: boolean = false;
-  @state() blockHeight: number = 0;
+  @state() blockHeight: number | undefined;
   @state() zeroHourBlocks: ZeroHourBlock[] = [];
   @state() zeroHourBlockTimeSegments: number[] = [];
   @state() zeroHourBlocksLoading: boolean = false;
@@ -98,49 +98,49 @@ export class Index extends LitElement {
     });
   }
 
-  private async pollRpc() {
-    console.log("Polling...", this.listeners);
-    this.listeners = [1];
-    setTimeout(() => {
-      console.log(this.listeners);
-    });
-    try {
-      if (!this.bitcoind) {
-        throw new Error(
-          "Bitcoind not initialized. Please set the RPC variables."
-        );
-      }
-      const info = await this.bitcoind.getBlockchainInfo();
-      this.hasConnected = true;
-      this.blockHeight = info.blocks;
-      this.loadZeroHourBlocks({
-        latestBlockHeight: info.blocks as number,
-        latestMedianTime: info.time as number,
-        pushFn: (block) => {
-          // Build the segments
-          if (this.zeroHourBlockTimeSegments.length > 0) {
-            const earliestBlockTime = this.zeroHourBlocks[0].time;
-            const diff = earliestBlockTime - block.time;
-            const radialAngle = calculateRadialAngle(diff);
-            this.zeroHourBlockTimeSegments = [
-              radialAngle,
-              ...this.zeroHourBlockTimeSegments,
-            ];
-          } else {
-            // Calculate the time difference between the latest zero hour block and now
-            const now = Math.floor(new Date().getTime() / 1000);
-            const diff = now - block.time;
-            const radialAngle = calculateRadialAngle(diff);
-            this.zeroHourBlockTimeSegments = [radialAngle];
-          }
-          // Add the block to the list of zero hour blocks in reverse order
-          this.zeroHourBlocks = [block, ...this.zeroHourBlocks];
-        },
-      });
-    } catch (e) {
-      console.error(e);
-    }
-  }
+  // private async pollRpc() {
+  //   console.log("Polling...", this.listeners);
+  //   this.listeners = [1];
+  //   setTimeout(() => {
+  //     console.log(this.listeners);
+  //   });
+  //   try {
+  //     if (!this.bitcoind) {
+  //       throw new Error(
+  //         "Bitcoind not initialized. Please set the RPC variables."
+  //       );
+  //     }
+  //     const info = await this.bitcoind.getBlockchainInfo();
+  //     this.hasConnected = true;
+  //     this.blockHeight = info.blocks;
+  //     this.loadZeroHourBlocks({
+  //       latestBlockHeight: info.blocks as number,
+  //       latestMedianTime: info.time as number,
+  //       pushFn: (block) => {
+  //         // Build the segments
+  //         if (this.zeroHourBlockTimeSegments.length > 0) {
+  //           const earliestBlockTime = this.zeroHourBlocks[0].time;
+  //           const diff = earliestBlockTime - block.time;
+  //           const radialAngle = calculateRadialAngle(diff);
+  //           this.zeroHourBlockTimeSegments = [
+  //             radialAngle,
+  //             ...this.zeroHourBlockTimeSegments,
+  //           ];
+  //         } else {
+  //           // Calculate the time difference between the latest zero hour block and now
+  //           const now = Math.floor(new Date().getTime() / 1000);
+  //           const diff = now - block.time;
+  //           const radialAngle = calculateRadialAngle(diff);
+  //           this.zeroHourBlockTimeSegments = [radialAngle];
+  //         }
+  //         // Add the block to the list of zero hour blocks in reverse order
+  //         this.zeroHourBlocks = [block, ...this.zeroHourBlocks];
+  //       },
+  //     });
+  //   } catch (e) {
+  //     console.error(e);
+  //   }
+  // }
 
   connectedCallback(): void {
     super.connectedCallback();
@@ -154,6 +154,7 @@ export class Index extends LitElement {
     this.blockClockActor.subscribe((snapshot) => {
       console.log("BlockClock snapshot", snapshot); // DEBUG
       this.blockClockState = snapshot.value as BlockClockState;
+      this.blockHeight = snapshot.context.blockHeight;
     });
     this.blockClockActor.start();
 
