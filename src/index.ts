@@ -5,6 +5,8 @@ import { DEFAULT_THEME } from "./utils/constants";
 import style from "./index.css?inline";
 import { BitcoinRpc } from "./lib/api/api";
 import { StoppedReason } from "./lib/types";
+import { machine as pollerMachine } from "./machines/poller";
+import { Actor, createActor } from "xstate";
 
 @customElement("block-clock")
 export class Index extends LitElement {
@@ -28,6 +30,7 @@ export class Index extends LitElement {
   @state() zeroHourBlocks: ZeroHourBlock[] = [];
   @state() zeroHourBlockTimeSegments: number[] = [];
   @state() zeroHourBlocksLoading: boolean = false;
+  @state() poller: Actor<typeof pollerMachine> | undefined;
 
   listeners: unknown[];
   bitcoind: BitcoinRpc | undefined;
@@ -146,6 +149,18 @@ export class Index extends LitElement {
   }
 
   connectedCallback(): void {
+    this.poller = createActor(pollerMachine, {
+      input: {
+        rpcUser: this.rpcUser,
+        rpcPassword: this.rpcPassword,
+        rpcEndpoint: this.rpcEndpoint,
+      },
+    });
+    this.poller.start();
+    this.poller.subscribe((state) => {
+      console.log(state.value);
+    });
+
     if (!this.rpcEndpoint || !this.rpcUser || !this.rpcPassword) {
       throw new Error("Missing required RPC variables");
     }
