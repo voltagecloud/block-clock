@@ -1,5 +1,9 @@
 import { html } from "lit";
-import { BlockClockTheme, StoppedReason } from "../lib/types.ts";
+import {
+  BlockClockState,
+  BlockClockTheme,
+  StoppedReason,
+} from "../lib/types.ts";
 import { Logo, LogoType } from "./Logo.ts";
 import { BlockClockFrame } from "./BlockClockFrame.ts";
 import { Title } from "./Title.ts";
@@ -8,14 +12,6 @@ import { IndicatorLoading } from "./IndicatorLoading.ts";
 import { Ring } from "./Ring.ts";
 import { RingSegmented } from "./RingSegmented.ts";
 import { numberWithCommas } from "../utils/format.ts";
-
-export enum BlockClockState {
-  Connecting = "Connecting",
-  Downloading = "Downloading",
-  Ready = "Ready",
-  Stopped = "Stopped",
-  LoadingBlocks = "Loading Blocks",
-}
 
 export interface BlockClockProps {
   state: BlockClockState;

@@ -19,9 +19,7 @@ export class BitcoinRpc {
     optionalHeaders?: HeadersInit;
   }) {
     const fetchMethod = "POST";
-    console.log(this.rpcEndpoint);
     const url = `https://${this.rpcEndpoint}`;
-    console.log("url", url);
     const body = {
       jsonrpc: "1.0",
       method,

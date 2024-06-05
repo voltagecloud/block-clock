@@ -1,19 +1,10 @@
 import { setup, fromPromise } from "xstate";
+import { RpcConfig } from "./types";
+import { getBlockchainInfo } from "../lib/api/api.new";
 
-const fetch = fromPromise(async ({ input }: { input: RpcConfig }) => {
-  return new Promise((resolve, reject) => {
-    console.log("Fetching...", input);
-    setTimeout(() => {
-      resolve("success");
-    }, 1000);
-  });
-});
-
-type RpcConfig = {
-  rpcUser: string;
-  rpcPassword: string;
-  rpcEndpoint: string;
-};
+const fetch = fromPromise(async ({ input }: { input: RpcConfig }) =>
+  getBlockchainInfo(input)
+);
 
 export const machine = setup({
   types: {
@@ -42,14 +33,14 @@ export const machine = setup({
     },
     poll_success: {
       after: {
-        "500": {
+        5000: {
           target: "poll",
         },
       },
     },
     poll_error: {
       after: {
-        "500": {
+        5000: {
           target: "poll",
         },
       },

@@ -1,11 +1,11 @@
 import { LitElement, unsafeCSS } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import { BlockClock, BlockClockState } from "./components/BlockClock";
+import { BlockClock } from "./components/BlockClock";
 import { DEFAULT_THEME } from "./utils/constants";
 import style from "./index.css?inline";
 import { BitcoinRpc } from "./lib/api/api";
-import { StoppedReason } from "./lib/types";
-import { machine as pollerMachine } from "./machines/poller";
+import { BlockClockState, StoppedReason } from "./lib/types";
+import { machine as blockClockMachine } from "./machines/block-clock";
 import { Actor, createActor } from "xstate";
 
 @customElement("block-clock")
@@ -30,30 +30,15 @@ export class Index extends LitElement {
   @state() zeroHourBlocks: ZeroHourBlock[] = [];
   @state() zeroHourBlockTimeSegments: number[] = [];
   @state() zeroHourBlocksLoading: boolean = false;
-  @state() poller: Actor<typeof pollerMachine> | undefined;
+  @state() blockClockState: BlockClockState | undefined;
 
   listeners: unknown[];
+  blockClockActor: Actor<typeof blockClockMachine> | undefined;
   bitcoind: BitcoinRpc | undefined;
 
   constructor() {
     super();
     this.listeners = [];
-  }
-
-  private getBlockState(): BlockClockState {
-    if (this.zeroHourBlocksLoading) {
-      return BlockClockState.LoadingBlocks;
-    }
-    if (this.downloading) {
-      return BlockClockState.Downloading;
-    }
-    if (this.stoppedReason) {
-      return BlockClockState.Stopped;
-    }
-    if (!this.hasConnected) {
-      return BlockClockState.Connecting;
-    }
-    return BlockClockState.Ready;
   }
 
   private async loadZeroHourBlocks({
@@ -149,28 +134,39 @@ export class Index extends LitElement {
   }
 
   connectedCallback(): void {
-    this.poller = createActor(pollerMachine, {
+    super.connectedCallback();
+    this.blockClockActor = createActor(blockClockMachine, {
       input: {
         rpcUser: this.rpcUser,
         rpcPassword: this.rpcPassword,
         rpcEndpoint: this.rpcEndpoint,
       },
     });
-    this.poller.start();
-    this.poller.subscribe((state) => {
-      console.log(state.value);
+    this.blockClockActor.subscribe((state) => {
+      this.blockClockState = state.value;
     });
+    this.blockClockActor.start();
+    // this.rpcPoller = createActor(rpcPollerMachine, {
+    //   input: {
+    //     rpcUser: this.rpcUser,
+    //     rpcPassword: this.rpcPassword,
+    //     rpcEndpoint: this.rpcEndpoint,
+    //   },
+    // });
+    // this.rpcPoller.start();
+    // this.rpcPoller.subscribe((state) => {
+    //   console.log(state.value);
+    // });
 
-    if (!this.rpcEndpoint || !this.rpcUser || !this.rpcPassword) {
-      throw new Error("Missing required RPC variables");
-    }
-    this.bitcoind = new BitcoinRpc(
-      this.rpcUser,
-      this.rpcPassword,
-      this.rpcEndpoint
-    );
-    super.connectedCallback();
-    this.pollRpc();
+    // if (!this.rpcEndpoint || !this.rpcUser || !this.rpcPassword) {
+    //   throw new Error("Missing required RPC variables");
+    // }
+    // this.bitcoind = new BitcoinRpc(
+    //   this.rpcUser,
+    //   this.rpcPassword,
+    //   this.rpcEndpoint
+    // );
+    // this.pollRpc();
   }
 
   disconnectedCallback(): void {
@@ -178,16 +174,18 @@ export class Index extends LitElement {
   }
 
   render() {
-    return BlockClock({
-      state: this.getBlockState(),
-      ringWidth: 2,
-      downloadProgress: 0,
-      blockHeight: this.blockHeight,
-      ringSegments: this.zeroHourBlockTimeSegments,
-      theme: this.theme,
-      darkMode: this.darkMode,
-      stoppedReason: this.stoppedReason,
-    });
+    if (this.blockClockState) {
+      return BlockClock({
+        state: this.blockClockState,
+        ringWidth: 2,
+        downloadProgress: 0,
+        blockHeight: this.blockHeight,
+        ringSegments: this.zeroHourBlockTimeSegments,
+        theme: this.theme,
+        darkMode: this.darkMode,
+        stoppedReason: this.stoppedReason,
+      });
+    }
   }
 }
 
