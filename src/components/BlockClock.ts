@@ -1,9 +1,5 @@
 import { html } from "lit";
-import {
-  BlockClockState,
-  BlockClockTheme,
-  StoppedReason,
-} from "../lib/types.ts";
+import { BlockClockTheme, StoppedReason } from "../lib/types.ts";
 import { Logo, LogoType } from "./Logo.ts";
 import { BlockClockFrame } from "./BlockClockFrame.ts";
 import { Title } from "./Title.ts";
@@ -12,6 +8,7 @@ import { IndicatorLoading } from "./IndicatorLoading.ts";
 import { Ring } from "./Ring.ts";
 import { RingSegmented } from "./RingSegmented.ts";
 import { numberWithCommas } from "../utils/format.ts";
+import { BlockClockState } from "../machines/block-clock.ts";
 
 export interface BlockClockProps {
   state: BlockClockState;

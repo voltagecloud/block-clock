@@ -2,11 +2,22 @@ import { fromPromise, setup } from "xstate";
 import { getBlockchainInfo } from "../lib/api/api.new";
 import { RpcConfig } from "./types";
 import { GetBlockchainInfoResponse } from "../lib/api/types";
-import { BlockClockState } from "../lib/types";
 
 const fetchBlockchainInfo = fromPromise(
   async ({ input }: { input: RpcConfig }) => getBlockchainInfo(input)
 );
+
+export enum BlockClockState {
+  Connecting = "Connecting",
+  ErrorConnecting = "Error Connecting",
+  WaitingIBD = "Waiting IBD",
+  Downloading = "Downloading",
+  BlockTime = "Block Time",
+  // TODO: Remove?
+  Ready = "Ready",
+  Stopped = "Stopped",
+  LoadingBlocks = "Loading Blocks",
+}
 
 export const machine = setup({
   types: {
@@ -39,7 +50,7 @@ export const machine = setup({
           { target: BlockClockState.BlockTime },
         ],
         onError: {
-          target: BlockClockState.Connecting,
+          target: BlockClockState.ErrorConnecting,
         },
         src: "fetchBlockchainInfo",
         input: ({ context }) => context,

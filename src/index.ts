@@ -4,9 +4,18 @@ import { BlockClock } from "./components/BlockClock";
 import { DEFAULT_THEME } from "./utils/constants";
 import style from "./index.css?inline";
 import { BitcoinRpc } from "./lib/api/api";
-import { BlockClockState, StoppedReason } from "./lib/types";
-import { machine as blockClockMachine } from "./machines/block-clock";
+import { StoppedReason } from "./lib/types";
+import {
+  BlockClockState,
+  machine as blockClockMachine,
+} from "./machines/block-clock";
 import { Actor, createActor } from "xstate";
+
+declare global {
+  interface Window {
+    emitLitDebugLogEvents: boolean;
+  }
+}
 
 @customElement("block-clock")
 export class Index extends LitElement {
@@ -142,10 +151,13 @@ export class Index extends LitElement {
         rpcEndpoint: this.rpcEndpoint,
       },
     });
-    this.blockClockActor.subscribe((state) => {
-      this.blockClockState = state.value;
+    this.blockClockActor.subscribe((snapshot) => {
+      // Debug
+      console.log("BlockClock snapshot", snapshot);
+      this.blockClockState = snapshot.value as BlockClockState;
     });
     this.blockClockActor.start();
+
     // this.rpcPoller = createActor(rpcPollerMachine, {
     //   input: {
     //     rpcUser: this.rpcUser,
