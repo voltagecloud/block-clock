@@ -1,4 +1,4 @@
-import { and, assign, emit, fromPromise, not, setup } from "xstate";
+import { assign, emit, fromPromise, not, sendTo, setup } from "xstate";
 import { getBlockStats, getBlockchainInfo } from "../lib/api/api.new";
 import { RpcConfig } from "./types";
 import { getMidnightOrMiddayTimestamp } from "../utils/time";
@@ -37,8 +37,9 @@ export type Context = RpcConfig & {
   blockHeight?: number;
   zeroHourBlocks: ZeroHourBlock[];
   zeroHourTimestamp: number;
+  hasDoneFullScan?: boolean;
+  zeroHourBlockHeight: number;
   pointer: number;
-  hasDoneFullScan: boolean;
 };
 
 export const machine = setup({
@@ -48,22 +49,44 @@ export const machine = setup({
   },
   actions: {
     updateInfo: assign(({ event }) => ({ blockHeight: event.output.blocks })),
+    setZeroHourBlockHeight: assign(({ event }) => ({
+      zeroHourBlockHeight: event.output.blocks,
+    })),
+    resetZeroHourBlockHeight: assign({ zeroHourBlockHeight: 0 }),
+    setHasDoneFullScan: assign({ hasDoneFullScan: true }),
+    resetHasDoneFullScan: assign({ hasDoneFullScan: false }),
     resetZeroHourTimestamp: assign(() => ({
       zeroHourTimestamp: getMidnightOrMiddayTimestamp(),
     })),
     resetZeroHourBlocks: assign({ zeroHourBlocks: [] }),
-    resetPointer: assign(({ context }) => ({ pointer: context.blockHeight })),
+    initPointer: assign(({ context }) => {
+      if (!context.pointer) {
+        return { pointer: context.blockHeight };
+      } else {
+        return {};
+      }
+    }),
+    initZeroHourTimestamp: assign(({ context }) => {
+      if (!context.zeroHourTimestamp) {
+        return { zeroHourTimestamp: getMidnightOrMiddayTimestamp() };
+      } else {
+        return {};
+      }
+    }),
+    resetPointer: assign(({ context }) => {
+      return { pointer: context.blockHeight };
+    }),
     addBlock: assign(({ context, event }) => ({
       zeroHourBlocks: [event.output, ...context.zeroHourBlocks],
+    })),
+    appendBlock: assign(({ context, event }) => ({
+      zeroHourBlocks: context.hasDoneFullScan
+        ? [event.output, ...context.zeroHourBlocks]
+        : [...context.zeroHourBlocks, event.output],
     })),
     decrementPointer: assign(({ context }) => ({
       pointer: context.pointer - 1,
     })),
-    setHasDoneFullScan: assign(() => ({ hasDoneFullScan: true })),
-    resetHasDoneFullScan: assign(() => ({ hasDoneFullScan: false })),
-    emitNewBlockHeight: emit({
-      type: "NEW_BLOCK_HEIGHT",
-    }),
   },
   actors: {
     fetchBlockchainInfo,
@@ -86,8 +109,10 @@ export const machine = setup({
     isNewBlockHeight: function ({ context, event }) {
       return context.blockHeight !== event.output.blocks;
     },
-    hasDoneFullScan: function ({ context }) {
-      return context.hasDoneFullScan;
+    isPointerOnOrBeforeZeroHourBlockHeight: function ({
+      context: { pointer, zeroHourBlockHeight },
+    }) {
+      return pointer <= zeroHourBlockHeight;
     },
   },
 }).createMachine({
@@ -95,7 +120,7 @@ export const machine = setup({
     zeroHourBlocks: [],
     pointer: 0,
     zeroHourTimestamp: 0,
-    hasDoneFullScan: false,
+    zeroHourBlockHeight: 0,
     ...input,
   }),
   id: "BlockClock",
@@ -152,8 +177,70 @@ export const machine = setup({
     },
     [BlockClockState.BlockTime]: {
       type: "parallel",
-      entry: ["resetPointer"],
+      entry: ["updateInfo", "initPointer", "initZeroHourTimestamp"],
       states: {
+        BlockAggregator: {
+          initial: "FullScan",
+          states: {
+            FullScan: {
+              always: [
+                {
+                  target: "Fetching",
+                  guard: not("hasPointerBlock"),
+                },
+                { target: "FullScan", actions: ["decrementPointer"] },
+              ],
+            },
+            Fetching: {
+              invoke: {
+                input: ({ context }) => context,
+                onDone: [
+                  {
+                    target: "WatchUpdates",
+                    guard: "isPointerOnOrBeforeZeroHourBlockHeight",
+                  },
+                  {
+                    target: "WatchUpdates",
+                    guard: "isBlockBeforeZeroHour",
+                    actions: [
+                      "resetPointer",
+                      "setHasDoneFullScan",
+                      "setZeroHourBlockHeight",
+                    ],
+                  },
+                  {
+                    target: "FullScan",
+                    actions: ["addBlock", "decrementPointer"],
+                  },
+                ],
+                onError: "Error",
+                src: "fetchBlockStats",
+              },
+            },
+            Error: {},
+            WatchUpdates: {
+              on: {
+                NEW_BLOCK_HEIGHT: [
+                  {
+                    target: "FullScan",
+                    guard: "isZeroHourBlocksStale",
+                    actions: [
+                      "resetZeroHourBlocks",
+                      "resetZeroHourTimestamp",
+                      "resetPointer",
+                      "resetHasDoneFullScan",
+                      "resetZeroHourBlockHeight",
+                    ],
+                  },
+                  {
+                    target: "FullScan",
+                    actions: ["resetPointer"],
+                  },
+                ],
+              },
+            },
+          },
+        },
         PollBlockchainInfo: {
           initial: "Poll",
           states: {
@@ -168,9 +255,13 @@ export const machine = setup({
                     },
                   },
                   {
-                    guard: "isNewBlockHeight",
                     target: "Waiting",
-                    actions: ["updateInfo", "emitNewBlockHeight"],
+                    actions: [
+                      "updateInfo",
+                      sendTo(({ event }: any) => event.sender, {
+                        type: "NEW_BLOCK_HEIGHT",
+                      }),
+                    ],
                   },
                   {
                     target: "Waiting",
@@ -184,77 +275,6 @@ export const machine = setup({
                 "2000": {
                   target: "Poll",
                 },
-              },
-            },
-          },
-        },
-        ScanBlocks: {
-          initial: "Scan",
-          entry: ["resetHasDoneFullScan", "resetPointer"],
-          states: {
-            Scan: {
-              always: [
-                {
-                  target: "Wait",
-                  guard: { type: "isZeroHourBlocksStale" },
-                  actions: [
-                    "resetZeroHourTimestamp",
-                    "resetZeroHourBlocks",
-                    "resetPointer",
-                    "resetHasDoneFullScan",
-                  ],
-                },
-                {
-                  target: "Idle",
-                  guard: and(["hasDoneFullScan", "hasPointerBlock"]),
-                },
-                {
-                  target: "Scan",
-                  guard: {
-                    type: "hasPointerBlock",
-                  },
-                  actions: ["decrementPointer"],
-                },
-                {
-                  target: "Fetching",
-                },
-              ],
-            },
-            Idle: {
-              on: {
-                NEW_BLOCK_HEIGHT: {
-                  target: "Scan",
-                  actions: ["resetPointer"],
-                },
-              },
-            },
-            Wait: {
-              after: {
-                100: {
-                  target: "Scan",
-                },
-              },
-            },
-            Fetching: {
-              invoke: {
-                input: ({ context }) => context,
-                onDone: [
-                  {
-                    target: "Idle",
-                    actions: ["setHasDoneFullScan"],
-                    guard: {
-                      type: "isBlockBeforeZeroHour",
-                    },
-                  },
-                  {
-                    target: "Scan",
-                    actions: ["addBlock", "decrementPointer"],
-                  },
-                ],
-                onError: {
-                  target: "Wait",
-                },
-                src: "fetchBlockStats",
               },
             },
           },

@@ -87,6 +87,7 @@ export class Index extends LitElement {
     this.blockClockActor.subscribe((snapshot) => {
       this.snapshot = snapshot;
       console.log({ snapshot });
+      console.log(snapshot.value["BlockTime"]);
       // DEBUG
       window.b = this.blockClockActor;
       this.blockClockState = this.getBlockClockState(snapshot);
@@ -132,6 +133,10 @@ export class Index extends LitElement {
         style="font-size: 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 4px;"
       >
         <div>
+          <b>Polling blockchain info:</b>
+          ${this.snapshot.matches("BlockTime.PollBlockchainInfo.Poll")}
+        </div>
+        <div>
           <b>Waiting to Scan Blocks:</b>
           ${this.snapshot.matches("BlockTime.ScanBlocks.Wait")}
         </div>
@@ -146,6 +151,10 @@ export class Index extends LitElement {
         <div>
           <b>Has done full scan:</b>
           ${this.snapshot.context.hasDoneFullScan}
+        </div>
+        <div>
+          <b>Zero Hour BlockHeight</b>
+          ${JSON.stringify(this.snapshot.context.zeroHourBlockHeight)}
         </div>
       </div>
     `;
