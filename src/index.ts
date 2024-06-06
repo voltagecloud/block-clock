@@ -44,6 +44,7 @@ export class Index extends LitElement {
   @state() zeroHourBlocksLoading: boolean = false;
   @state() blockClockState: BlockClockState | undefined;
   @state() blockClockContext: BlockClockContext | undefined;
+  @state() ringSegments: number[] = [];
 
   listeners: unknown[];
   blockClockActor: Actor<typeof blockClockMachine> | undefined;
@@ -84,7 +85,7 @@ export class Index extends LitElement {
     });
     this.blockClockActor.subscribe((snapshot) => {
       // DEBUG
-      console.log({ snapshot });
+      window.b = this.blockClockActor;
       this.blockClockState = this.getBlockClockState(snapshot);
       this.blockHeight = snapshot.context.blockHeight;
       this.zeroHourBlocks = snapshot.context.zeroHourBlocks;
@@ -97,8 +98,25 @@ export class Index extends LitElement {
         );
       }
     });
-    window.b = this.blockClockActor;
     this.blockClockActor.start();
+    this.initRingSegmentBuilder();
+  }
+
+  initRingSegmentBuilder() {
+    if (this.blockClockContext) {
+      this.ringSegments = calculateRadialTimeDifferences(
+        this.blockClockContext.zeroHourBlocks,
+        this.blockClockContext.zeroHourTimestamp
+      );
+    }
+    setInterval(() => {
+      if (this.blockClockContext) {
+        this.ringSegments = calculateRadialTimeDifferences(
+          this.blockClockContext.zeroHourBlocks,
+          this.blockClockContext.zeroHourTimestamp
+        );
+      }
+    }, 1000);
   }
 
   disconnectedCallback(): void {
@@ -112,10 +130,7 @@ export class Index extends LitElement {
         ringWidth: 2,
         downloadProgress: 0,
         blockHeight: this.blockClockContext.blockHeight,
-        ringSegments: calculateRadialTimeDifferences(
-          this.blockClockContext.zeroHourBlocks,
-          this.blockClockContext.zeroHourTimestamp
-        ),
+        ringSegments: this.ringSegments,
         theme: this.theme,
         darkMode: this.darkMode,
         stoppedReason: this.stoppedReason,
