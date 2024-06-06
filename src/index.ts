@@ -45,6 +45,7 @@ export class Index extends LitElement {
   @state() blockClockState: BlockClockState | undefined;
   @state() blockClockContext: BlockClockContext | undefined;
   @state() ringSegments: number[] = [];
+  @state() snapshot: any;
 
   listeners: unknown[];
   blockClockActor: Actor<typeof blockClockMachine> | undefined;
@@ -84,6 +85,8 @@ export class Index extends LitElement {
       },
     });
     this.blockClockActor.subscribe((snapshot) => {
+      this.snapshot = snapshot;
+      console.log({ snapshot });
       // DEBUG
       window.b = this.blockClockActor;
       this.blockClockState = this.getBlockClockState(snapshot);
@@ -124,17 +127,42 @@ export class Index extends LitElement {
   }
 
   render() {
+    const devTools = html`
+      <div
+        style="font-size: 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 4px;"
+      >
+        <div>
+          <b>Waiting to Scan Blocks:</b>
+          ${this.snapshot.matches("BlockTime.ScanBlocks.Wait")}
+        </div>
+        <div>
+          <b>Scan Blocks Idle:</b>
+          ${this.snapshot.matches("BlockTime.ScanBlocks.Idle")}
+        </div>
+        <div>
+          <b>Pointer:</b>
+          ${this.snapshot.context.pointer}
+        </div>
+        <div>
+          <b>Has done full scan:</b>
+          ${this.snapshot.context.hasDoneFullScan}
+        </div>
+      </div>
+    `;
     if (this.blockClockState && this.blockClockContext) {
-      return html` ${BlockClock({
-        state: this.blockClockState,
-        ringWidth: 2,
-        downloadProgress: 0,
-        blockHeight: this.blockClockContext.blockHeight,
-        ringSegments: this.ringSegments,
-        theme: this.theme,
-        darkMode: this.darkMode,
-        stoppedReason: this.stoppedReason,
-      })}`;
+      return html`
+        ${devTools}
+        ${BlockClock({
+          state: this.blockClockState,
+          ringWidth: 2,
+          downloadProgress: 0,
+          blockHeight: this.blockClockContext.blockHeight,
+          ringSegments: this.ringSegments,
+          theme: this.theme,
+          darkMode: this.darkMode,
+          stoppedReason: this.stoppedReason,
+        })}
+      `;
     }
   }
 }

@@ -1,4 +1,4 @@
-import { assign, emit, fromPromise, setup } from "xstate";
+import { and, assign, emit, fromPromise, not, setup } from "xstate";
 import { getBlockStats, getBlockchainInfo } from "../lib/api/api.new";
 import { RpcConfig } from "./types";
 import { getMidnightOrMiddayTimestamp } from "../utils/time";
@@ -23,14 +23,14 @@ export type ZeroHourBlock = {
 
 export enum BlockClockState {
   Connecting = "Connecting",
-  ErrorConnecting = "Error Connecting",
-  WaitingIBD = "Waiting IBD",
+  ErrorConnecting = "ErrorConnecting",
+  WaitingIBD = "WaitingIBD",
   Downloading = "Downloading",
-  BlockTime = "Block Time",
+  BlockTime = "BlockTime",
   // TODO: Remove?
   Ready = "Ready",
   Stopped = "Stopped",
-  LoadingBlocks = "Loading Blocks",
+  LoadingBlocks = "LoadingBlocks",
 }
 
 export type Context = RpcConfig & {
@@ -63,7 +63,6 @@ export const machine = setup({
     resetHasDoneFullScan: assign(() => ({ hasDoneFullScan: false })),
     emitNewBlockHeight: emit({
       type: "NEW_BLOCK_HEIGHT",
-      actions: ["resetPointer"],
     }),
   },
   actors: {
@@ -128,7 +127,9 @@ export const machine = setup({
         Poll: {
           invoke: {
             input: ({ context }) => context,
+            src: "fetchBlockchainInfo",
             onDone: [
+              { actions: ["updateInfo"] },
               {
                 target: "Poll Success",
                 guard: {
@@ -136,10 +137,9 @@ export const machine = setup({
                 },
               },
               {
-                target: "#BlockClock.Block Time",
+                target: "#BlockClock.BlockTime",
               },
             ],
-            src: "fetchBlockchainInfo",
           },
         },
         "Poll Success": {
@@ -153,9 +153,6 @@ export const machine = setup({
     },
     [BlockClockState.BlockTime]: {
       type: "parallel",
-      entry: {
-        type: "updateInfo",
-      },
       states: {
         PollBlockchainInfo: {
           initial: "Poll",
@@ -164,8 +161,9 @@ export const machine = setup({
               invoke: {
                 input: ({ context }) => context,
                 onDone: [
+                  { actions: ["updateInfo"] },
                   {
-                    target: "#BlockClock.Waiting IBD",
+                    target: "#BlockClock.WaitingIBD",
                     guard: {
                       type: "isIBD",
                     },
@@ -193,7 +191,7 @@ export const machine = setup({
         },
         ScanBlocks: {
           initial: "Scan",
-          entry: ["resetPointer"],
+          entry: ["resetHasDoneFullScan", "resetPointer"],
           states: {
             Scan: {
               always: [
@@ -209,12 +207,10 @@ export const machine = setup({
                 },
                 {
                   target: "Idle",
-                  guard: {
-                    type: "hasDoneFullScan",
-                  },
+                  guard: and(["hasDoneFullScan", "hasPointerBlock"]),
                 },
                 {
-                  target: "Wait",
+                  target: "Scan",
                   guard: {
                     type: "hasPointerBlock",
                   },
@@ -245,8 +241,8 @@ export const machine = setup({
                 input: ({ context }) => context,
                 onDone: [
                   {
-                    target: "Scan",
-                    actions: ["resetPointer", "setHasDoneFullScan"],
+                    target: "Idle",
+                    actions: ["setHasDoneFullScan"],
                     guard: {
                       type: "isBlockBeforeZeroHour",
                     },
