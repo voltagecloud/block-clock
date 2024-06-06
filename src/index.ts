@@ -1,15 +1,16 @@
-import { LitElement, unsafeCSS } from "lit";
+import { LitElement, html, unsafeCSS } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
+import { Actor, createActor } from "xstate";
 import { BlockClock } from "./components/BlockClock";
-import { DEFAULT_THEME } from "./utils/constants";
 import style from "./index.css?inline";
 import { BitcoinRpc } from "./lib/api/api";
 import { StoppedReason } from "./lib/types";
 import {
   BlockClockState,
+  Context as BlockClockContext,
   machine as blockClockMachine,
 } from "./machines/block-clock";
-import { Actor, createActor } from "xstate";
+import { DEFAULT_THEME } from "./utils/constants";
 
 declare global {
   interface Window {
@@ -40,6 +41,7 @@ export class Index extends LitElement {
   @state() zeroHourBlockTimeSegments: number[] = [];
   @state() zeroHourBlocksLoading: boolean = false;
   @state() blockClockState: BlockClockState | undefined;
+  @state() blockClockContext: BlockClockContext | undefined;
 
   listeners: unknown[];
   blockClockActor: Actor<typeof blockClockMachine> | undefined;
@@ -50,97 +52,22 @@ export class Index extends LitElement {
     this.listeners = [];
   }
 
-  private async loadZeroHourBlocks({
-    latestBlockHeight,
-    latestMedianTime,
-    pushFn,
-  }: {
-    latestBlockHeight: number;
-    latestMedianTime: number;
-    pushFn: (block: ZeroHourBlock) => void;
-  }): Promise<ZeroHourBlock[]> {
-    this.zeroHourBlocksLoading = true;
-    const zeroHourTimestamp = getMidnightOrMiddayTimestamp();
-    return new Promise(async (resolve, reject) => {
-      const blocks: {
-        height: number;
-        hash: string;
-        time: number;
-      }[] = [];
-      let currentBlockHeight = latestBlockHeight;
-      let currentMedianTime = latestMedianTime * 1000;
-      let count = 0;
-      while (currentMedianTime > zeroHourTimestamp && currentBlockHeight > 0) {
-        try {
-          if (!this.bitcoind) {
-            throw new Error(
-              "Bitcoind not initialized. Please set the RPC variables."
-            );
-          }
-          const blockStats = await this.bitcoind.getBlockStats({
-            hashOrHeight: currentBlockHeight,
-            stats: ["blockhash", "height", "time"],
-          });
-          pushFn({
-            height: blockStats.height as number,
-            hash: blockStats.blockhash as string,
-            time: blockStats.time as number,
-          });
-          currentBlockHeight = (blockStats.height as number) - 1;
-          currentMedianTime = (blockStats.time as number) * 1000;
-          count++;
-        } catch (e) {
-          return reject(e);
-        }
-      }
-      this.zeroHourBlocksLoading = false;
-      resolve(blocks);
-    });
-  }
-
-  // private async pollRpc() {
-  //   console.log("Polling...", this.listeners);
-  //   this.listeners = [1];
-  //   setTimeout(() => {
-  //     console.log(this.listeners);
-  //   });
-  //   try {
-  //     if (!this.bitcoind) {
-  //       throw new Error(
-  //         "Bitcoind not initialized. Please set the RPC variables."
-  //       );
-  //     }
-  //     const info = await this.bitcoind.getBlockchainInfo();
-  //     this.hasConnected = true;
-  //     this.blockHeight = info.blocks;
-  //     this.loadZeroHourBlocks({
-  //       latestBlockHeight: info.blocks as number,
-  //       latestMedianTime: info.time as number,
-  //       pushFn: (block) => {
-  //         // Build the segments
-  //         if (this.zeroHourBlockTimeSegments.length > 0) {
-  //           const earliestBlockTime = this.zeroHourBlocks[0].time;
-  //           const diff = earliestBlockTime - block.time;
-  //           const radialAngle = calculateRadialAngle(diff);
-  //           this.zeroHourBlockTimeSegments = [
-  //             radialAngle,
-  //             ...this.zeroHourBlockTimeSegments,
-  //           ];
-  //         } else {
-  //           // Calculate the time difference between the latest zero hour block and now
-  //           const now = Math.floor(new Date().getTime() / 1000);
-  //           const diff = now - block.time;
-  //           const radialAngle = calculateRadialAngle(diff);
-  //           this.zeroHourBlockTimeSegments = [radialAngle];
-  //         }
-  //         // Add the block to the list of zero hour blocks in reverse order
-  //         this.zeroHourBlocks = [block, ...this.zeroHourBlocks];
-  //       },
-  //     });
-  //   } catch (e) {
-  //     console.error(e);
-  //   }
-  // }
+  // TODO: Better way to do this?
+  getBlockClockState = (snapshot: any) => {
+    if (snapshot.matches(BlockClockState.Stopped)) {
+      return BlockClockState.Stopped;
+    } else if (snapshot.matches(BlockClockState.Connecting)) {
+      return BlockClockState.Connecting;
+    } else if (snapshot.matches(BlockClockState.LoadingBlocks)) {
+      return BlockClockState.LoadingBlocks;
+    } else if (snapshot.matches(BlockClockState.Downloading)) {
+      return BlockClockState.Downloading;
+    } else if (snapshot.matches(BlockClockState.BlockTime)) {
+      return BlockClockState.BlockTime;
+    } else if (snapshot.matches(BlockClockState.Ready)) {
+      return BlockClockState.Ready;
+    }
+  };
 
   connectedCallback(): void {
     super.connectedCallback();
@@ -152,33 +79,12 @@ export class Index extends LitElement {
       },
     });
     this.blockClockActor.subscribe((snapshot) => {
-      console.log("BlockClock snapshot", snapshot); // DEBUG
-      this.blockClockState = snapshot.value as BlockClockState;
+      this.blockClockState = this.getBlockClockState(snapshot);
       this.blockHeight = snapshot.context.blockHeight;
+      this.zeroHourBlocks = snapshot.context.zeroHourBlocks;
+      this.blockClockContext = snapshot.context;
     });
     this.blockClockActor.start();
-
-    // this.rpcPoller = createActor(rpcPollerMachine, {
-    //   input: {
-    //     rpcUser: this.rpcUser,
-    //     rpcPassword: this.rpcPassword,
-    //     rpcEndpoint: this.rpcEndpoint,
-    //   },
-    // });
-    // this.rpcPoller.start();
-    // this.rpcPoller.subscribe((state) => {
-    //   console.log(state.value);
-    // });
-
-    // if (!this.rpcEndpoint || !this.rpcUser || !this.rpcPassword) {
-    //   throw new Error("Missing required RPC variables");
-    // }
-    // this.bitcoind = new BitcoinRpc(
-    //   this.rpcUser,
-    //   this.rpcPassword,
-    //   this.rpcEndpoint
-    // );
-    // this.pollRpc();
   }
 
   disconnectedCallback(): void {
@@ -186,17 +92,20 @@ export class Index extends LitElement {
   }
 
   render() {
-    if (this.blockClockState) {
-      return BlockClock({
+    if (this.blockClockState && this.blockClockContext) {
+      return html`${BlockClock({
         state: this.blockClockState,
         ringWidth: 2,
         downloadProgress: 0,
         blockHeight: this.blockHeight,
-        ringSegments: this.zeroHourBlockTimeSegments,
+        ringSegments: calculateRadialTimeDifferences(
+          this.zeroHourBlocks,
+          this.blockClockContext.zeroHourTimestamp
+        ),
         theme: this.theme,
         darkMode: this.darkMode,
         stoppedReason: this.stoppedReason,
-      });
+      })}`;
     }
   }
 }
@@ -223,18 +132,18 @@ type ZeroHourBlock = {
 //   return twelveHoursAgo.getTime();
 // }
 
-// This function returns the timestamp of the latest midday or midnight before the current time
-function getMidnightOrMiddayTimestamp() {
-  const now = new Date();
-  const midnight = new Date(now);
-  midnight.setHours(0, 0, 0, 0);
-  const midday = new Date(now);
-  midday.setHours(12, 0, 0, 0);
-  return now.getTime() - now.getTimezoneOffset() * 60 * 1000 < midday.getTime()
-    ? midnight.getTime()
-    : midday.getTime();
-}
-
 function calculateRadialAngle(seconds: number) {
   return (seconds * 360) / (12 * 60 * 60);
+}
+
+function calculateRadialTimeDifferences(
+  blocks: ZeroHourBlock[],
+  zeroHourTimestamp: number
+) {
+  return blocks.map((block, i, arr) => {
+    if (i === 0) {
+      return calculateRadialAngle(block.time - zeroHourTimestamp / 1000);
+    }
+    return calculateRadialAngle(block.time - arr[i - 1].time);
+  });
 }
