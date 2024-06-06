@@ -79,7 +79,7 @@ export class Index extends LitElement {
         rpcPassword: this.rpcPassword,
         rpcEndpoint: this.rpcEndpoint,
         // Load context cache from local storage
-        ...JSON.parse(localStorage.getItem("blockClockContext") || "{}"),
+        ...getCachedContext(),
       },
     });
     this.blockClockActor.subscribe((snapshot) => {
@@ -88,18 +88,16 @@ export class Index extends LitElement {
       this.blockClockState = this.getBlockClockState(snapshot);
       this.blockHeight = snapshot.context.blockHeight;
       this.zeroHourBlocks = snapshot.context.zeroHourBlocks;
-      // check if context has changed
-      if (
-        !objectsEqual(snapshot.context.zeroHourBlocks, this.zeroHourBlocks) ||
-        !this.blockClockContext
-      ) {
-        this.blockClockContext = snapshot.context;
+      this.blockClockContext = snapshot.context;
+      // Update the cache only if the context has changed
+      if (!objectsEqual(getCachedContext(), this.blockClockContext)) {
         localStorage.setItem(
           "blockClockContext",
           JSON.stringify(snapshot.context)
         );
       }
     });
+    window.b = this.blockClockActor;
     this.blockClockActor.start();
   }
 
@@ -109,14 +107,13 @@ export class Index extends LitElement {
 
   render() {
     if (this.blockClockState && this.blockClockContext) {
-      return html`pointer:
-      ${this.blockClockContext.pointer}${BlockClock({
+      return html` ${BlockClock({
         state: this.blockClockState,
         ringWidth: 2,
         downloadProgress: 0,
-        blockHeight: this.blockHeight,
+        blockHeight: this.blockClockContext.blockHeight,
         ringSegments: calculateRadialTimeDifferences(
-          this.zeroHourBlocks,
+          this.blockClockContext.zeroHourBlocks,
           this.blockClockContext.zeroHourTimestamp
         ),
         theme: this.theme,
@@ -148,3 +145,7 @@ type ZeroHourBlock = {
 //   twelveHoursAgo.setHours(now.getHours() - 11);
 //   return twelveHoursAgo.getTime();
 // }
+
+function getCachedContext() {
+  return JSON.parse(localStorage.getItem("blockClockContext") || "{}");
+}

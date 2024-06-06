@@ -1,4 +1,4 @@
-import { assign, fromPromise, setup } from "xstate";
+import { assign, emit, fromPromise, setup } from "xstate";
 import { getBlockStats, getBlockchainInfo } from "../lib/api/api.new";
 import { RpcConfig } from "./types";
 import { getMidnightOrMiddayTimestamp } from "../utils/time";
@@ -61,6 +61,10 @@ export const machine = setup({
     })),
     setHasDoneFullScan: assign(() => ({ hasDoneFullScan: true })),
     resetHasDoneFullScan: assign(() => ({ hasDoneFullScan: false })),
+    emitNewBlockHeight: emit({
+      type: "NEW_BLOCK_HEIGHT",
+      actions: ["resetPointer"],
+    }),
   },
   actors: {
     fetchBlockchainInfo,
@@ -79,6 +83,9 @@ export const machine = setup({
     },
     isBlockBeforeZeroHour: function ({ context, event }) {
       return event.output.time * 1000 < context.zeroHourTimestamp;
+    },
+    isNewBlockHeight: function ({ context, event }) {
+      return context.blockHeight !== event.output.blocks;
     },
     hasDoneFullScan: function ({ context }) {
       return context.hasDoneFullScan;
@@ -164,6 +171,11 @@ export const machine = setup({
                     },
                   },
                   {
+                    guard: "isNewBlockHeight",
+                    target: "Waiting",
+                    actions: ["emitNewBlockHeight"],
+                  },
+                  {
                     target: "Waiting",
                   },
                 ],
@@ -186,12 +198,6 @@ export const machine = setup({
             Scan: {
               always: [
                 {
-                  target: "Idle",
-                  guard: {
-                    type: "hasDoneFullScan",
-                  },
-                },
-                {
                   target: "Wait",
                   guard: { type: "isZeroHourBlocksStale" },
                   actions: [
@@ -200,6 +206,12 @@ export const machine = setup({
                     "resetPointer",
                     "resetHasDoneFullScan",
                   ],
+                },
+                {
+                  target: "Idle",
+                  guard: {
+                    type: "hasDoneFullScan",
+                  },
                 },
                 {
                   target: "Wait",
@@ -213,7 +225,14 @@ export const machine = setup({
                 },
               ],
             },
-            Idle: {},
+            Idle: {
+              on: {
+                NEW_BLOCK_HEIGHT: {
+                  target: "Scan",
+                  actions: ["resetPointer"],
+                },
+              },
+            },
             Wait: {
               after: {
                 100: {
