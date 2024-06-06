@@ -129,7 +129,6 @@ export const machine = setup({
             input: ({ context }) => context,
             src: "fetchBlockchainInfo",
             onDone: [
-              { actions: ["updateInfo"] },
               {
                 target: "Poll Success",
                 guard: {
@@ -162,7 +161,6 @@ export const machine = setup({
               invoke: {
                 input: ({ context }) => context,
                 onDone: [
-                  { actions: ["updateInfo"] },
                   {
                     target: "#BlockClock.WaitingIBD",
                     guard: {
@@ -172,7 +170,7 @@ export const machine = setup({
                   {
                     guard: "isNewBlockHeight",
                     target: "Waiting",
-                    actions: ["emitNewBlockHeight"],
+                    actions: ["updateInfo", "emitNewBlockHeight"],
                   },
                   {
                     target: "Waiting",
