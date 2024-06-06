@@ -12,6 +12,7 @@ import {
 } from "./machines/block-clock";
 import { DEFAULT_THEME } from "./utils/constants";
 import { calculateRadialTimeDifferences } from "./utils/math";
+import { objectsEqual } from "./json";
 
 declare global {
   interface Window {
@@ -82,15 +83,22 @@ export class Index extends LitElement {
       },
     });
     this.blockClockActor.subscribe((snapshot) => {
+      // DEBUG
+      console.log({ snapshot });
       this.blockClockState = this.getBlockClockState(snapshot);
       this.blockHeight = snapshot.context.blockHeight;
       this.zeroHourBlocks = snapshot.context.zeroHourBlocks;
-      this.blockClockContext = snapshot.context;
-      // Cache context to local storage
-      localStorage.setItem(
-        "blockClockContext",
-        JSON.stringify(snapshot.context)
-      );
+      // check if context has changed
+      if (
+        !objectsEqual(snapshot.context.zeroHourBlocks, this.zeroHourBlocks) ||
+        !this.blockClockContext
+      ) {
+        this.blockClockContext = snapshot.context;
+        localStorage.setItem(
+          "blockClockContext",
+          JSON.stringify(snapshot.context)
+        );
+      }
     });
     this.blockClockActor.start();
   }
