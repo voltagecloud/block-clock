@@ -11,6 +11,7 @@ import {
   machine as blockClockMachine,
 } from "./machines/block-clock";
 import { DEFAULT_THEME } from "./utils/constants";
+import { calculateRadialTimeDifferences } from "./utils/math";
 
 declare global {
   interface Window {
@@ -76,6 +77,8 @@ export class Index extends LitElement {
         rpcUser: this.rpcUser,
         rpcPassword: this.rpcPassword,
         rpcEndpoint: this.rpcEndpoint,
+        // Load context cache from local storage
+        ...JSON.parse(localStorage.getItem("blockClockContext") || "{}"),
       },
     });
     this.blockClockActor.subscribe((snapshot) => {
@@ -83,6 +86,11 @@ export class Index extends LitElement {
       this.blockHeight = snapshot.context.blockHeight;
       this.zeroHourBlocks = snapshot.context.zeroHourBlocks;
       this.blockClockContext = snapshot.context;
+      // Cache context to local storage
+      localStorage.setItem(
+        "blockClockContext",
+        JSON.stringify(snapshot.context)
+      );
     });
     this.blockClockActor.start();
   }
@@ -93,7 +101,8 @@ export class Index extends LitElement {
 
   render() {
     if (this.blockClockState && this.blockClockContext) {
-      return html`${BlockClock({
+      return html`pointer:
+      ${this.blockClockContext.pointer}${BlockClock({
         state: this.blockClockState,
         ringWidth: 2,
         downloadProgress: 0,
@@ -131,19 +140,3 @@ type ZeroHourBlock = {
 //   twelveHoursAgo.setHours(now.getHours() - 11);
 //   return twelveHoursAgo.getTime();
 // }
-
-function calculateRadialAngle(seconds: number) {
-  return (seconds * 360) / (12 * 60 * 60);
-}
-
-function calculateRadialTimeDifferences(
-  blocks: ZeroHourBlock[],
-  zeroHourTimestamp: number
-) {
-  return blocks.map((block, i, arr) => {
-    if (i === 0) {
-      return calculateRadialAngle(block.time - zeroHourTimestamp / 1000);
-    }
-    return calculateRadialAngle(block.time - arr[i - 1].time);
-  });
-}

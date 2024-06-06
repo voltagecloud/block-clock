@@ -1,18 +1,24 @@
-function normalize(data: number[]) {
-  const max = Math.max(...data);
-  const min = Math.min(...data);
-  const normal = data.map((value) => (value - min) / (max - min));
-  normal.shift();
-  return normal;
+export function calculateRadialAngle(seconds: number) {
+  return (seconds * 360) / (12 * 60 * 60);
 }
 
-function differences(data: number[]) {
-  let diffs = data.map((value, i) => (i > 0 ? value - data[i - 1] : value));
-  // Remove the first element because it is only used for comparison
-  diffs[0] = 0;
-  return diffs;
-}
-
-function getScaleCoefficient(data: number[], filled: number) {
-  return filled / data.reduce((acc, val) => acc + val, 0);
+export function calculateRadialTimeDifferences(
+  blocks: { time: number }[],
+  zeroHourTimestamp: number
+) {
+  let differences = blocks.map((block, i, arr) => {
+    if (i === 0) {
+      return calculateRadialAngle(block.time - zeroHourTimestamp / 1000);
+    }
+    return calculateRadialAngle(block.time - arr[i - 1].time);
+  });
+  if (differences.length > 0) {
+    // Include one last segment with a diff of the last block with the current time
+    differences.push(
+      calculateRadialAngle(
+        Math.floor(Date.now() / 1000) - blocks[blocks.length - 1].time
+      )
+    );
+  }
+  return differences;
 }
