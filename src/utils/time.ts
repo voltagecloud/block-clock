@@ -5,7 +5,7 @@ export function getMidnightOrMiddayTimestamp() {
   midnight.setHours(0, 0, 0, 0);
   const midday = new Date(now);
   midday.setHours(12, 0, 0, 0);
-  return now.getTime() - now.getTimezoneOffset() * 60 * 1000 < midday.getTime()
+  return now.getTime() < midday.getTime()
     ? midnight.getTime()
     : midday.getTime();
 }
