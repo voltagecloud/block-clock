@@ -49,9 +49,12 @@ export const machine = setup({
   },
   actions: {
     updateInfo: assign(({ event }) => ({ blockHeight: event.output.blocks })),
-    setZeroHourBlockHeight: assign(({ event }) => ({
-      zeroHourBlockHeight: event.output.blocks,
-    })),
+    setZeroHourBlockHeight: assign(({ context, event }) => {
+      console.log({ context, event });
+      return {
+        zeroHourBlockHeight: context.pointer,
+      };
+    }),
     resetZeroHourBlockHeight: assign({ zeroHourBlockHeight: 0 }),
     setHasDoneFullScan: assign({ hasDoneFullScan: true }),
     resetHasDoneFullScan: assign({ hasDoneFullScan: false }),
@@ -112,7 +115,11 @@ export const machine = setup({
     isPointerOnOrBeforeZeroHourBlockHeight: function ({
       context: { pointer, zeroHourBlockHeight },
     }) {
-      return pointer <= zeroHourBlockHeight;
+      if (!zeroHourBlockHeight) {
+        return false;
+      } else {
+        return pointer <= zeroHourBlockHeight;
+      }
     },
   },
 }).createMachine({
@@ -185,6 +192,10 @@ export const machine = setup({
             FullScan: {
               always: [
                 {
+                  target: "WatchUpdates",
+                  guard: "isPointerOnOrBeforeZeroHourBlockHeight",
+                },
+                {
                   target: "Fetching",
                   guard: not("hasPointerBlock"),
                 },
@@ -197,16 +208,8 @@ export const machine = setup({
                 onDone: [
                   {
                     target: "WatchUpdates",
-                    guard: "isPointerOnOrBeforeZeroHourBlockHeight",
-                  },
-                  {
-                    target: "WatchUpdates",
                     guard: "isBlockBeforeZeroHour",
-                    actions: [
-                      "resetPointer",
-                      "setHasDoneFullScan",
-                      "setZeroHourBlockHeight",
-                    ],
+                    actions: ["setHasDoneFullScan", "setZeroHourBlockHeight"],
                   },
                   {
                     target: "FullScan",
