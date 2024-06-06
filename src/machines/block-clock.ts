@@ -153,6 +153,7 @@ export const machine = setup({
     },
     [BlockClockState.BlockTime]: {
       type: "parallel",
+      entry: ["resetPointer"],
       states: {
         PollBlockchainInfo: {
           initial: "Poll",
