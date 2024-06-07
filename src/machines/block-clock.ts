@@ -248,6 +248,17 @@ export const machine = setup({
             FullScan: {
               always: [
                 {
+                  target: "FullScan",
+                  guard: "isZeroHourBlocksStale",
+                  actions: [
+                    "resetZeroHourBlocks",
+                    "resetZeroHourTimestamp",
+                    "resetPointer",
+                    "resetHasDoneFullScan",
+                    "resetZeroHourBlockHeight",
+                  ],
+                },
+                {
                   target: "WatchUpdates",
                   guard: "isPointerOnOrBeforeZeroHourBlockHeight",
                 },
