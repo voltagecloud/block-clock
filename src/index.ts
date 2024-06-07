@@ -3,7 +3,6 @@ import { customElement, property, state } from "lit/decorators.js";
 import { Actor, createActor } from "xstate";
 import { BlockClock } from "./components/BlockClock";
 import style from "./index.css?inline";
-import { BitcoinRpc } from "./lib/api/api";
 import { StoppedReason } from "./lib/types";
 import {
   BlockClockState,
@@ -37,24 +36,12 @@ export class Index extends LitElement {
   @property({ type: Boolean }) downloading = false;
   @property({ type: String }) stoppedReason?: StoppedReason = undefined;
 
-  @state() hasConnected: boolean = false;
-  @state() blockHeight: number | undefined;
-  @state() zeroHourBlocks: ZeroHourBlock[] = [];
-  @state() zeroHourBlockTimeSegments: number[] = [];
-  @state() zeroHourBlocksLoading: boolean = false;
   @state() blockClockState: BlockClockState | undefined;
   @state() blockClockContext: BlockClockContext | undefined;
   @state() ringSegments: number[] = [];
   @state() snapshot: any;
 
-  listeners: unknown[];
   blockClockActor: Actor<typeof blockClockMachine> | undefined;
-  bitcoind: BitcoinRpc | undefined;
-
-  constructor() {
-    super();
-    this.listeners = [];
-  }
 
   // TODO: Better way to do this?
   getBlockClockState = (snapshot: any) => {
@@ -95,8 +82,6 @@ export class Index extends LitElement {
       // DEBUG
       window.b = this.blockClockActor;
       this.blockClockState = this.getBlockClockState(snapshot);
-      this.blockHeight = snapshot.context.blockHeight;
-      this.zeroHourBlocks = snapshot.context.zeroHourBlocks;
       this.blockClockContext = snapshot.context;
       // Update the cache only if the context has changed
       updateCachedContext(snapshot.context);
@@ -164,7 +149,8 @@ export class Index extends LitElement {
           ringWidth: 2,
           downloadProgress: this.blockClockContext.verificationProgress,
           ibdCompletionEstimate: this.blockClockContext.IBDEstimation,
-          blockHeight: this.blockClockContext.blockHeight,
+          blocks: this.blockClockContext.blocks,
+          headers: this.blockClockContext.headers,
           ringSegments: this.ringSegments,
           theme: this.theme,
           darkMode: this.darkMode,

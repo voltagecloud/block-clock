@@ -21,7 +21,8 @@ export interface BlockClockProps {
   downloadProgress: number;
   ibdCompletionEstimate?: number;
   stoppedReason?: StoppedReason;
-  blockHeight: number | undefined;
+  blocks: number | undefined;
+  headers: number | undefined;
   ringSegments: number[];
   darkMode: boolean;
   theme: BlockClockTheme;
@@ -42,17 +43,28 @@ function getLogoTypeFromStoppedReason(stoppedReason?: StoppedReason) {
   }
 }
 
+function isSyncingHeaders({
+  blocks,
+  headers,
+}: {
+  blocks: number | undefined;
+  headers: number | undefined;
+}) {
+  return (!blocks && !headers) || (!blocks && headers);
+}
+
 function getClock({
   stoppedReason,
   ringWidth,
   theme,
   downloadProgress,
-  blockHeight,
+  blocks,
+  headers,
   ringSegments,
   state,
-  ibdCompletionEstimate,
   darkMode,
 }: BlockClockProps) {
+  const _isSyncingHeaders = isSyncingHeaders({ blocks, headers });
   switch (state) {
     case BlockClockState.Stopped:
       return BlockClockFrame({
@@ -92,14 +104,17 @@ function getClock({
     case BlockClockState.WaitingIBD:
       return BlockClockFrame({
         ringWidth,
-        ring: Ring({ ringFillAngle: downloadProgress * 100 * 3.6, ringWidth }),
+        ring: _isSyncingHeaders
+          ? undefined
+          : Ring({ ringFillAngle: downloadProgress * 100 * 3.6, ringWidth }),
         top: Logo({ logo: LogoType.Bitcoin }),
         middle: Title({
-          text: "Downloading",
+          text: _isSyncingHeaders ? "Syncing" : "Downloading",
         }),
         lowerMiddle: Subtitle({
-          text: `${roundToDecimalPoints(downloadProgress * 100, 2)}%`,
-          // text: formatEstimation(ibdCompletionEstimate),
+          text: _isSyncingHeaders
+            ? "Please Wait"
+            : `${roundToDecimalPoints(downloadProgress * 100, 2)}%`,
         }),
         bottom: IndicatorLoading(),
         darkMode,
@@ -109,7 +124,7 @@ function getClock({
         ringWidth,
         ring: RingSegmented({ ringWidth, ringSegments, theme }),
         top: Logo({ logo: LogoType.Bitcoin }),
-        middle: Title({ text: numberWithCommas(blockHeight), scale: 1.2 }),
+        middle: Title({ text: numberWithCommas(blocks), scale: 1.2 }),
         lowerMiddle: Subtitle({ text: `Blocktime` }),
         bottom: IndicatorPeers(),
         darkMode,

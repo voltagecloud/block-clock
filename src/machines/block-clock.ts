@@ -34,7 +34,8 @@ export enum BlockClockState {
 }
 
 export type Context = RpcConfig & {
-  blockHeight?: number;
+  blocks: number;
+  headers: number;
   zeroHourBlocks: ZeroHourBlock[];
   zeroHourTimestamp: number;
   hasDoneFullScan?: boolean;
@@ -93,7 +94,7 @@ export const machine = setup({
     }),
     resetIBDEstimation: assign({ IBDEstimationArray: [], IBDEstimation: 0 }),
     updateInfo: assign(({ event }) => ({
-      blockHeight: event.output.blocks,
+      blocks: event.output.blocks,
       verificationProgress: event.output.verificationprogress,
     })),
     setZeroHourBlockHeight: assign(({ context }) => {
@@ -110,7 +111,7 @@ export const machine = setup({
     resetZeroHourBlocks: assign({ zeroHourBlocks: [] }),
     initPointer: assign(({ context }) => {
       if (!context.pointer) {
-        return { pointer: context.blockHeight };
+        return { pointer: context.blocks };
       } else {
         return {};
       }
@@ -123,7 +124,7 @@ export const machine = setup({
       }
     }),
     resetPointer: assign(({ context }) => {
-      return { pointer: context.blockHeight };
+      return { pointer: context.blocks };
     }),
     addBlock: assign(({ context, event }) => ({
       zeroHourBlocks: context.hasDoneFullScan
@@ -153,7 +154,7 @@ export const machine = setup({
       return event.output.time * 1000 < context.zeroHourTimestamp;
     },
     isNewBlockHeight: function ({ context, event }) {
-      return context.blockHeight !== event.output.blocks;
+      return context.blocks !== event.output.blocks;
     },
     isPointerOnOrBeforeZeroHourBlockHeight: function ({
       context: { pointer, zeroHourBlockHeight },
@@ -167,6 +168,8 @@ export const machine = setup({
   },
 }).createMachine({
   context: ({ input }) => ({
+    blocks: 0,
+    headers: 0,
     zeroHourBlocks: [],
     pointer: 0,
     zeroHourTimestamp: 0,
