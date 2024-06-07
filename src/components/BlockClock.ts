@@ -13,6 +13,7 @@ import {
   roundToDecimalPoints,
 } from "../utils/format.ts";
 import { BlockClockState } from "../machines/block-clock.ts";
+import { IndicatorPeers } from "./IndicatorPeers.ts";
 
 export interface BlockClockProps {
   state: BlockClockState;
@@ -110,7 +111,7 @@ function getClock({
         top: Logo({ logo: LogoType.Bitcoin }),
         middle: Title({ text: numberWithCommas(blockHeight), scale: 1.2 }),
         lowerMiddle: Subtitle({ text: `Blocktime` }),
-        bottom: IndicatorLoading(),
+        bottom: IndicatorPeers(),
         darkMode,
       });
   }
