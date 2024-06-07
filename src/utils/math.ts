@@ -19,6 +19,13 @@ export function calculateRadialTimeDifferences(
         Math.floor(Date.now() / 1000) - blocks[blocks.length - 1].time
       )
     );
+  } else if (differences.length === 0) {
+    // If there are no blocks, include one segment that draws from the zeroHourTimestamp to now
+    differences.push(
+      calculateRadialAngle(
+        Math.floor(Date.now() / 1000) - zeroHourTimestamp / 1000
+      )
+    );
   }
   return differences;
 }

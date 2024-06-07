@@ -73,7 +73,7 @@ export const machine = setup({
     addToIBDEstimation: assign(({ event, context }) => {
       // Keep an array of 10 estimations
       let IBDEstimationArray;
-      if (context.IBDEstimationArray.length >= 100) {
+      if (context.IBDEstimationArray.length >= 10) {
         IBDEstimationArray = [
           ...context.IBDEstimationArray.slice(1),
           {
