@@ -26,6 +26,7 @@ export const RingTrack = ({ ringWidth, size, withPoints }: RingTrackProps) => {
         ? pointArrays.map(
             ({ cx, cy }) => svg`
           <circle
+            class="animate-pulse"
             style=${styleMap(styles.svgPoint)}
             cx=${cx}
             cy=${cy}
