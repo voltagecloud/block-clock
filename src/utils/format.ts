@@ -1,6 +1,6 @@
 // Function to format number with commas i.e. 1000000 -> 1,000,000
 export function numberWithCommas(x?: number) {
-  if (x) {
+  if (x || x === 0) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   } else {
     return "";
