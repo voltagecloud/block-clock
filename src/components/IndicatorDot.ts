@@ -23,6 +23,7 @@ export const IndicatorDot = ({
         ? "var(--title-text-color)"
         : "var(--subtitle-text-color)",
     "animation-delay": `${animationDelay}s`,
+    opacity: 0,
   });
 
   return html` <span class=${classes} style=${style}>•</span> `;

@@ -11,6 +11,7 @@ import { numberWithCommas, roundToDecimalPoints } from "../utils/format.ts";
 import { BlockClockState } from "../machines/block-clock.ts";
 import { IndicatorPeers } from "./IndicatorPeers.ts";
 import { RingTrack } from "./RingTrack.ts";
+import { IndicatorInactive } from "./IndicatorInactive.ts";
 
 export interface BlockClockProps {
   state: BlockClockState;
@@ -69,7 +70,7 @@ function getClock({
         top: Logo({ logo: getLogoTypeFromStoppedReason(stoppedReason) }),
         middle: Title({ text: "Stopped" }),
         lowerMiddle: Subtitle({ text: stoppedReason }),
-        bottom: IndicatorLoading(),
+        bottom: IndicatorInactive(),
         darkMode,
       });
     case BlockClockState.Connecting:

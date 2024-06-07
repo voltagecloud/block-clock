@@ -31,14 +31,20 @@ html,
 
 /** Animations */
 @keyframes pulse {
+  0% {
+    opacity: 50%;
+  }
   50% {
-    opacity: 0;
+    opacity: 100%;
+  }
+  100% {
+    opacity: 0%;
   }
 }
 
 .animate-pulse {
   animation-name: pulse;
-  animation-duration: 2s;
+  animation-duration: 5s;
   animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1);
   animation-iteration-count: infinite;
 }
