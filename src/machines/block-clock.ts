@@ -1,5 +1,5 @@
 import { assign, fromPromise, not, sendTo, setup } from "xstate";
-import { getBlockStats, getBlockchainInfo } from "../lib/api/api.new";
+import { getBlockStats, getBlockchainInfo } from "../lib/api/api";
 import { RpcConfig } from "./types";
 import { getMidnightOrMiddayTimestamp } from "../utils/time";
 

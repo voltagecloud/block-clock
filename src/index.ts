@@ -32,6 +32,7 @@ export class Index extends LitElement {
   @property({ type: String }) rpcUser = "";
   @property({ type: String }) rpcPassword = "";
   @property({ type: Boolean }) darkMode = false;
+  @property({ type: Boolean }) devMode = false;
   @property({ type: Object }) theme = DEFAULT_THEME;
   @property({ type: Boolean }) downloading = false;
   @property({ type: String }) stoppedReason?: StoppedReason = undefined;
@@ -76,14 +77,16 @@ export class Index extends LitElement {
       },
     });
     this.blockClockActor.subscribe((snapshot) => {
+      if (this.devMode) {
+        console.log({ snapshot });
+        console.log(snapshot.value["BlockTime"]);
+        window.blockClockActor = this.blockClockActor;
+        window.clearStorageAndReload = () => {
+          localStorage.clear();
+          location.reload();
+        };
+      }
       this.snapshot = snapshot;
-      console.log({ snapshot });
-      console.log(snapshot.value["BlockTime"]);
-      window.blockClockActor = this.blockClockActor;
-      window.clearStorageAndReload = () => {
-        localStorage.clear();
-        location.reload();
-      };
       window.loadDataIntoStorage = (obj: any) => {
         localStorage.clear();
         updateCachedContext(obj);
@@ -156,7 +159,7 @@ export class Index extends LitElement {
     `;
     if (this.blockClockState && this.blockClockContext) {
       return html`
-        ${devTools}
+        ${this.devMode ? devTools : ""}
         ${BlockClock({
           state: this.blockClockState,
           ringWidth: 2,
