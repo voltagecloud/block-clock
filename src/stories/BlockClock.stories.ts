@@ -1,12 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/web-components";
-import {
-  BlockClock,
-  BlockClockState,
-  type BlockClockProps,
-} from "../components/BlockClock";
+import { BlockClock, type BlockClockProps } from "../components/BlockClock";
 import { html } from "lit";
 import { DEFAULT_THEME } from "../utils/constants";
 import { StoppedReason } from "../lib/types";
+import { BlockClockState } from "../machines/block-clock";
 
 const getBlockClockDemo = (args: BlockClockProps) =>
   html`<div style="width: 300px; height: 300px;">${BlockClock(args)}</div>`;
@@ -18,8 +15,10 @@ const meta = {
   render: getBlockClockDemo,
   argTypes: {
     ringWidth: { control: { type: "range", min: 0, max: 8 } },
-    downloadProgress: { control: { type: "range", min: 0, max: 100 } },
-    blockHeight: { control: { type: "range", min: 0, max: 9_999_999 } },
+    downloadProgress: {
+      control: { type: "range", min: 0, max: 1, step: 0.01 },
+    },
+    blocks: { control: { type: "range", min: 0, max: 9_999_999 } },
     theme: { control: "object" },
     state: {
       control: "select",
@@ -32,7 +31,7 @@ const meta = {
   },
   args: {
     state: BlockClockState.Ready,
-    blockHeight: 840_000,
+    blocks: 840_000,
     darkMode: true,
     downloadProgress: 0,
     ringSegments: [5, 13, 21, 18, 10, 8, 5, 3, 2, 1],
@@ -51,15 +50,23 @@ export const Connecting: Story = {
   },
 };
 
-export const Downloading: Story = {
+export const SyncingHeaders: Story = {
   args: {
-    state: BlockClockState.Downloading,
+    state: BlockClockState.WaitingIBD,
+    blocks: 0,
+    headers: 0,
   },
 };
 
-export const Ready: Story = {
+export const Downloading: Story = {
   args: {
-    state: BlockClockState.Ready,
+    state: BlockClockState.WaitingIBD,
+  },
+};
+
+export const BlockTime: Story = {
+  args: {
+    state: BlockClockState.BlockTime,
   },
 };
 
