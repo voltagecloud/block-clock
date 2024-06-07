@@ -10,6 +10,7 @@ import { RingSegmented } from "./RingSegmented.ts";
 import { numberWithCommas, roundToDecimalPoints } from "../utils/format.ts";
 import { BlockClockState } from "../machines/block-clock.ts";
 import { IndicatorPeers } from "./IndicatorPeers.ts";
+import { RingTrack } from "./RingTrack.ts";
 
 export interface BlockClockProps {
   state: BlockClockState;
@@ -118,6 +119,7 @@ function getClock({
     default:
       return BlockClockFrame({
         ringWidth,
+        ringTrack: RingTrack({ ringWidth, size: 1, withPoints: true }),
         ring: RingSegmented({ ringWidth, ringSegments, theme }),
         top: Logo({ logo: LogoType.Bitcoin }),
         middle: Title({ text: numberWithCommas(blocks), scale: 1.2 }),

@@ -2,11 +2,12 @@ import { html, svg } from "lit";
 import { styleMap } from "lit/directives/style-map.js";
 
 export interface RingTrackProps {
+  withPoints?: boolean;
   ringWidth: number;
   size: number;
 }
 
-export const RingTrack = ({ ringWidth, size }: RingTrackProps) => {
+export const RingTrack = ({ ringWidth, size, withPoints }: RingTrackProps) => {
   const pointScale = 0.25;
   const pointArrays = [0, 45, 90, 135, 180, 225, 270, 315].map((angle) =>
     convertAngleToCxCyAroundCircle(angle, ringWidth)
@@ -21,8 +22,9 @@ export const RingTrack = ({ ringWidth, size }: RingTrackProps) => {
         r=${50 - ringWidth / 2}
         stroke-width="${ringWidth * size}"
       />
-      ${pointArrays.map(
-        ({ cx, cy }) => svg`
+      ${withPoints
+        ? pointArrays.map(
+            ({ cx, cy }) => svg`
           <circle
             style=${styleMap(styles.svgPoint)}
             cx=${cx}
@@ -30,7 +32,8 @@ export const RingTrack = ({ ringWidth, size }: RingTrackProps) => {
             r=${pointSize}
           />
         `
-      )}
+          )
+        : undefined}
     </svg>
   `;
 };
