@@ -79,8 +79,16 @@ export class Index extends LitElement {
       this.snapshot = snapshot;
       console.log({ snapshot });
       console.log(snapshot.value["BlockTime"]);
-      // DEBUG
-      window.b = this.blockClockActor;
+      window.blockClockActor = this.blockClockActor;
+      window.clearStorageAndReload = () => {
+        localStorage.clear();
+        location.reload();
+      };
+      window.loadDataIntoStorage = (obj: any) => {
+        localStorage.clear();
+        updateCachedContext(obj);
+        location.reload();
+      };
       this.blockClockState = this.getBlockClockState(snapshot);
       this.blockClockContext = snapshot.context;
       // Update the cache only if the context has changed
@@ -144,6 +152,7 @@ export class Index extends LitElement {
     `;
     if (this.blockClockState && this.blockClockContext) {
       return html`
+        ${devTools}
         ${BlockClock({
           state: this.blockClockState,
           ringWidth: 2,
@@ -166,12 +175,6 @@ declare global {
     "block-clock": Index;
   }
 }
-
-type ZeroHourBlock = {
-  height: number;
-  hash: string;
-  time: number;
-};
 
 // This is temporarily here for debugging purposes because if your local time just past
 // the midnight or midday mark, none or almost no blocks will be fetched to display the
@@ -197,8 +200,6 @@ function updateCachedContext(newContext: any) {
     }, {});
 
   if (!objectsEqual(getCachedContext(), filteredContext)) {
-    // Only save to local storage object with the following keys: rpcUser
-    // rpcPassword, rpcEndpoint, zeroHourBlocks, zeroHourTimestamp, blockHeight
     localStorage.setItem("blockClockContext", JSON.stringify(filteredContext));
   }
 }

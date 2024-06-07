@@ -46,6 +46,24 @@ export type Context = RpcConfig & {
   IBDEstimationArray: { progressTakenAt: number; progress: number }[];
 };
 
+function addBlockInCorrectPosition(
+  zeroHourBlocks: ZeroHourBlock[],
+  block: ZeroHourBlock
+) {
+  const index = zeroHourBlocks.findIndex(
+    (zeroHourBlock) => zeroHourBlock.height > block.height
+  );
+  if (index === -1) {
+    return [...zeroHourBlocks, block];
+  } else {
+    return [
+      ...zeroHourBlocks.slice(0, index),
+      block,
+      ...zeroHourBlocks.slice(index),
+    ];
+  }
+}
+
 export const machine = setup({
   types: {
     context: {} as Context,
@@ -128,12 +146,14 @@ export const machine = setup({
     }),
     addBlock: assign(({ context, event }) => ({
       zeroHourBlocks: context.hasDoneFullScan
-        ? [...context.zeroHourBlocks, event.output]
+        ? addBlockInCorrectPosition(context.zeroHourBlocks, event.output)
         : [event.output, ...context.zeroHourBlocks],
     })),
-    decrementPointer: assign(({ context }) => ({
-      pointer: context.pointer - 1,
-    })),
+    decrementPointer: assign(({ context }) => {
+      return {
+        pointer: context.pointer - 1,
+      };
+    }),
   },
   actors: {
     fetchBlockchainInfo,
@@ -147,14 +167,8 @@ export const machine = setup({
     hasPointerBlock: function ({ context: { zeroHourBlocks, pointer } }) {
       return !!zeroHourBlocks.find((block) => block.height === pointer);
     },
-    isZeroBlocksEmpty: function ({ context: { zeroHourBlocks } }) {
-      return zeroHourBlocks.length === 0;
-    },
     isBlockBeforeZeroHour: function ({ context, event }) {
       return event.output.time * 1000 < context.zeroHourTimestamp;
-    },
-    isNewBlockHeight: function ({ context, event }) {
-      return context.blocks !== event.output.blocks;
     },
     isPointerOnOrBeforeZeroHourBlockHeight: function ({
       context: { pointer, zeroHourBlockHeight },
@@ -183,6 +197,20 @@ export const machine = setup({
   initial: BlockClockState.Connecting,
   states: {
     [BlockClockState.Connecting]: {
+      always: [
+        {
+          guard: "isZeroHourBlocksStale",
+          description:
+            "Prevents UI from rendering stale zero hour blocks when machine is loaded with cache data.",
+          actions: [
+            "resetZeroHourBlocks",
+            "resetZeroHourTimestamp",
+            "resetPointer",
+            "resetHasDoneFullScan",
+            "resetZeroHourBlockHeight",
+          ],
+        },
+      ],
       invoke: {
         onDone: [
           {
@@ -290,18 +318,7 @@ export const machine = setup({
             Error: {},
             WatchUpdates: {
               on: {
-                NEW_BLOCK_HEIGHT: [
-                  {
-                    target: "FullScan",
-                    guard: "isZeroHourBlocksStale",
-                    actions: [
-                      "resetZeroHourBlocks",
-                      "resetZeroHourTimestamp",
-                      "resetPointer",
-                      "resetHasDoneFullScan",
-                      "resetZeroHourBlockHeight",
-                    ],
-                  },
+                BLOCKCHAIN_INFO_UPDATED: [
                   {
                     target: "FullScan",
                     actions: ["resetPointer"],
@@ -329,12 +346,9 @@ export const machine = setup({
                     actions: [
                       "updateInfo",
                       sendTo(({ event }: any) => event.sender, {
-                        type: "NEW_BLOCK_HEIGHT",
+                        type: "BLOCKCHAIN_INFO_UPDATED",
                       }),
                     ],
-                  },
-                  {
-                    target: "Waiting",
                   },
                 ],
                 src: "fetchBlockchainInfo",
