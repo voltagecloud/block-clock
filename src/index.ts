@@ -201,8 +201,18 @@ function getCachedContext() {
   return JSON.parse(localStorage.getItem("blockClockContext") || "{}");
 }
 
-function updateCachedContext(newContext: Object) {
-  if (!objectsEqual(getCachedContext(), newContext)) {
-    localStorage.setItem("blockClockContext", JSON.stringify(newContext));
+function updateCachedContext(newContext: any) {
+  const excludeKeys = ["rpcUser", "rpcPassword", "rpcEndpoint"];
+  const filteredContext = Object.keys(newContext)
+    .filter((key) => !excludeKeys.includes(key))
+    .reduce((obj: any, key: any) => {
+      obj[key] = newContext[key];
+      return obj;
+    }, {});
+
+  if (!objectsEqual(getCachedContext(), filteredContext)) {
+    // Only save to local storage object with the following keys: rpcUser
+    // rpcPassword, rpcEndpoint, zeroHourBlocks, zeroHourTimestamp, blockHeight
+    localStorage.setItem("blockClockContext", JSON.stringify(filteredContext));
   }
 }
