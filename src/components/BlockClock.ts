@@ -7,11 +7,7 @@ import { Subtitle } from "./Subtitle.ts";
 import { IndicatorLoading } from "./IndicatorLoading.ts";
 import { Ring } from "./Ring.ts";
 import { RingSegmented } from "./RingSegmented.ts";
-import {
-  formatEstimation,
-  numberWithCommas,
-  roundToDecimalPoints,
-} from "../utils/format.ts";
+import { numberWithCommas, roundToDecimalPoints } from "../utils/format.ts";
 import { BlockClockState } from "../machines/block-clock.ts";
 import { IndicatorPeers } from "./IndicatorPeers.ts";
 

@@ -10,8 +10,8 @@ import {
   machine as blockClockMachine,
 } from "./machines/block-clock";
 import { DEFAULT_THEME } from "./utils/constants";
+import { objectsEqual } from "./utils/assert";
 import { calculateRadialTimeDifferences } from "./utils/math";
-import { objectsEqual } from "./json";
 
 declare global {
   interface Window {
@@ -31,7 +31,7 @@ export class Index extends LitElement {
   @property({ type: String }) rpcEndpoint = "";
   @property({ type: String }) rpcUser = "";
   @property({ type: String }) rpcPassword = "";
-  @property({ type: Boolean }) darkMode = true;
+  @property({ type: Boolean }) darkMode = false;
   @property({ type: Object }) theme = DEFAULT_THEME;
   @property({ type: Boolean }) downloading = false;
   @property({ type: String }) stoppedReason?: StoppedReason = undefined;
@@ -147,6 +147,10 @@ export class Index extends LitElement {
         <div>
           <b>Zero Hour BlockHeight</b>
           ${JSON.stringify(this.snapshot.context.zeroHourBlockHeight)}
+        </div>
+        <div>
+          <b>Dark Mode</b>
+          ${JSON.stringify(this.darkMode)}
         </div>
       </div>
     `;

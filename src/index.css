@@ -11,6 +11,7 @@ html,
 }
 
 /** Theme */
+:host,
 :root {
   --title-text-color: #333;
   --subtitle-text-color: #666;
@@ -19,6 +20,7 @@ html,
   --ring-point-color: #aaa;
 }
 
+:host .dark,
 :root .dark {
   --title-text-color: white;
   --subtitle-text-color: #808080;
