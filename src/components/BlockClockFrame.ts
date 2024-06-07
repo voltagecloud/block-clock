@@ -10,7 +10,7 @@ export interface BlockClockFrameProps {
   top: TemplateResult;
   middle: TemplateResult;
   lowerMiddle: TemplateResult;
-  bottom: TemplateResult;
+  bottom?: TemplateResult;
   darkMode: boolean;
 }
 
@@ -28,10 +28,11 @@ export const BlockClockFrame = ({
     <div class=${classMap({ dark: darkMode })} style=${styleMap(wrapperStyle)}>
       ${ringTrack} ${ring}
       <div style=${styleMap(contentStyle)}>
-        <div style=${styleMap(topStyle)}>${top}</div>
-        <div style=${styleMap(middleStyle)}>${middle}</div>
-        <div style=${styleMap(lowerMiddleStyle)}>${lowerMiddle}</div>
-        <div style=${styleMap(bottomStyle)}>${bottom}</div>
+        ${top && html`<div style=${styleMap(topStyle)}>${top}</div>`}
+        ${middle && html`<div style=${styleMap(middleStyle)}>${middle}</div>`}
+        ${lowerMiddle &&
+        html`<div style=${styleMap(lowerMiddleStyle)}>${lowerMiddle}</div>`}
+        ${bottom && html`<div style=${styleMap(bottomStyle)}>${bottom}</div>`}
       </div>
     </div>
   `;

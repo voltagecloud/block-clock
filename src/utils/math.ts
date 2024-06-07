@@ -22,3 +22,7 @@ export function calculateRadialTimeDifferences(
   }
   return differences;
 }
+
+export function roundToDecimalPoints(num: number, decimalPoints: number) {
+  return Math.round(num * 10 ** decimalPoints) / 10 ** decimalPoints;
+}

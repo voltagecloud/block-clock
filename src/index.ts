@@ -70,6 +70,10 @@ export class Index extends LitElement {
       return BlockClockState.BlockTime;
     } else if (snapshot.matches(BlockClockState.Ready)) {
       return BlockClockState.Ready;
+    } else if (snapshot.matches(BlockClockState.WaitingIBD)) {
+      return BlockClockState.WaitingIBD;
+    } else if (snapshot.matches(BlockClockState.ErrorConnecting)) {
+      return BlockClockState.ErrorConnecting;
     }
   };
 
@@ -95,12 +99,7 @@ export class Index extends LitElement {
       this.zeroHourBlocks = snapshot.context.zeroHourBlocks;
       this.blockClockContext = snapshot.context;
       // Update the cache only if the context has changed
-      if (!objectsEqual(getCachedContext(), this.blockClockContext)) {
-        localStorage.setItem(
-          "blockClockContext",
-          JSON.stringify(snapshot.context)
-        );
-      }
+      updateCachedContext(snapshot.context);
     });
     this.blockClockActor.start();
     this.initRingSegmentBuilder();
@@ -160,11 +159,11 @@ export class Index extends LitElement {
     `;
     if (this.blockClockState && this.blockClockContext) {
       return html`
-        ${devTools}
         ${BlockClock({
           state: this.blockClockState,
           ringWidth: 2,
-          downloadProgress: 0,
+          downloadProgress: this.blockClockContext.verificationProgress,
+          ibdCompletionEstimate: this.blockClockContext.IBDEstimation,
           blockHeight: this.blockClockContext.blockHeight,
           ringSegments: this.ringSegments,
           theme: this.theme,
@@ -200,4 +199,10 @@ type ZeroHourBlock = {
 
 function getCachedContext() {
   return JSON.parse(localStorage.getItem("blockClockContext") || "{}");
+}
+
+function updateCachedContext(newContext: Object) {
+  if (!objectsEqual(getCachedContext(), newContext)) {
+    localStorage.setItem("blockClockContext", JSON.stringify(newContext));
+  }
 }

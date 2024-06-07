@@ -7,13 +7,18 @@ import { Subtitle } from "./Subtitle.ts";
 import { IndicatorLoading } from "./IndicatorLoading.ts";
 import { Ring } from "./Ring.ts";
 import { RingSegmented } from "./RingSegmented.ts";
-import { numberWithCommas } from "../utils/format.ts";
+import {
+  formatEstimation,
+  numberWithCommas,
+  roundToDecimalPoints,
+} from "../utils/format.ts";
 import { BlockClockState } from "../machines/block-clock.ts";
 
 export interface BlockClockProps {
   state: BlockClockState;
   ringWidth: number;
   downloadProgress: number;
+  ibdCompletionEstimate?: number;
   stoppedReason?: StoppedReason;
   blockHeight: number | undefined;
   ringSegments: number[];
@@ -44,6 +49,7 @@ function getClock({
   blockHeight,
   ringSegments,
   state,
+  ibdCompletionEstimate,
   darkMode,
 }: BlockClockProps) {
   switch (state) {
@@ -74,13 +80,26 @@ function getClock({
         bottom: IndicatorLoading(),
         darkMode,
       });
-    case BlockClockState.Downloading:
+    case BlockClockState.ErrorConnecting:
       return BlockClockFrame({
         ringWidth,
-        ring: Ring({ ringFillAngle: downloadProgress * 3.6, ringWidth }),
+        top: Logo({ logo: LogoType.Paused }),
+        middle: Title({ text: "Error" }),
+        lowerMiddle: Subtitle({ text: "RPC Connect Fail" }),
+        darkMode,
+      });
+    case BlockClockState.WaitingIBD:
+      return BlockClockFrame({
+        ringWidth,
+        ring: Ring({ ringFillAngle: downloadProgress * 100 * 3.6, ringWidth }),
         top: Logo({ logo: LogoType.Bitcoin }),
-        middle: Title({ text: "Downloading" }),
-        lowerMiddle: Subtitle({ text: "Please Wait" }),
+        middle: Title({
+          text: "Downloading",
+        }),
+        lowerMiddle: Subtitle({
+          text: `${roundToDecimalPoints(downloadProgress * 100, 2)}%`,
+          // text: formatEstimation(ibdCompletionEstimate),
+        }),
         bottom: IndicatorLoading(),
         darkMode,
       });

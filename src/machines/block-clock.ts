@@ -1,4 +1,4 @@
-import { assign, emit, fromPromise, not, sendTo, setup } from "xstate";
+import { assign, fromPromise, not, sendTo, setup } from "xstate";
 import { getBlockStats, getBlockchainInfo } from "../lib/api/api.new";
 import { RpcConfig } from "./types";
 import { getMidnightOrMiddayTimestamp } from "../utils/time";
@@ -40,6 +40,9 @@ export type Context = RpcConfig & {
   hasDoneFullScan?: boolean;
   zeroHourBlockHeight: number;
   pointer: number;
+  verificationProgress: number;
+  IBDEstimation?: number;
+  IBDEstimationArray: { progressTakenAt: number; progress: number }[];
 };
 
 export const machine = setup({
@@ -48,9 +51,78 @@ export const machine = setup({
     input: {} as RpcConfig,
   },
   actions: {
-    updateInfo: assign(({ event }) => ({ blockHeight: event.output.blocks })),
-    setZeroHourBlockHeight: assign(({ context, event }) => {
-      console.log({ context, event });
+    addToIBDEstimation: assign(({ event, context }) => {
+      // Keep an array of 10 estimations
+      let IBDEstimationArray;
+      if (context.IBDEstimationArray.length >= 100) {
+        IBDEstimationArray = [
+          ...context.IBDEstimationArray.slice(1),
+          {
+            progressTakenAt: Date.now(),
+            progress: event.output.verificationprogress,
+          },
+        ];
+      } else {
+        IBDEstimationArray = [
+          ...context.IBDEstimationArray,
+          {
+            progressTakenAt: Date.now(),
+            progress: event.output.verificationprogress,
+          },
+        ];
+      }
+
+      // let rateArray: number[] = [];
+      // if (IBDEstimationArray.length > 1) {
+      //   for (let i = 1; i < IBDEstimationArray.length - 1; i++) {
+      //     const prev = IBDEstimationArray[i - 1];
+      //     const curr = IBDEstimationArray[i];
+      //     const duration = curr.progressTakenAt - prev.progressTakenAt;
+      //     const progress = curr.progress - prev.progress;
+      //     if (progress < 0) {
+      //       rateArray = [...rateArray, 0];
+      //     } else {
+      //       const rateOfProgress = progress / duration;
+      //       rateArray = [...rateArray, rateOfProgress];
+      //     }
+      //   }
+      //   // Take the average of the rateArray
+      // }
+
+      // if (rateArray.length) {
+      //   const averageRate =
+      //     rateArray.reduce((a, b) => a + b, 0) / rateArray.length;
+      //   const remainingProgress = 1 - event.output.verificationprogress;
+      //   remainingTime = remainingProgress / averageRate;
+      // }
+
+      // console.log(rateArray);
+
+      let IBDEstimation = 0;
+      if (IBDEstimationArray.length > 1) {
+        const first = IBDEstimationArray[0];
+        const last = IBDEstimationArray[IBDEstimationArray.length - 1];
+        const duration = last.progressTakenAt - first.progressTakenAt;
+        const progress = last.progress - first.progress;
+        const rateOfProgress = progress / duration;
+
+        // Calculate how long it will take to finish IBD
+        const remainingProgress = 1 - event.output.verificationprogress;
+        const remainingTime = (remainingProgress * 100) / rateOfProgress;
+        IBDEstimation = remainingTime > 0 ? remainingTime : 0;
+      }
+
+      return {
+        IBDEstimationArray,
+        IBDEstimation,
+      };
+    }),
+    resetIBDEstimation: assign({ IBDEstimationArray: [], IBDEstimation: 0 }),
+    updateInfo: assign(({ event }) => ({
+      blockHeight: event.output.blocks,
+      verificationProgress: event.output.verificationprogress,
+    })),
+    setZeroHourBlockHeight: assign(({ context }) => {
       return {
         zeroHourBlockHeight: context.pointer,
       };
@@ -80,12 +152,9 @@ export const machine = setup({
       return { pointer: context.blockHeight };
     }),
     addBlock: assign(({ context, event }) => ({
-      zeroHourBlocks: [event.output, ...context.zeroHourBlocks],
-    })),
-    appendBlock: assign(({ context, event }) => ({
       zeroHourBlocks: context.hasDoneFullScan
-        ? [event.output, ...context.zeroHourBlocks]
-        : [...context.zeroHourBlocks, event.output],
+        ? [...context.zeroHourBlocks, event.output]
+        : [event.output, ...context.zeroHourBlocks],
     })),
     decrementPointer: assign(({ context }) => ({
       pointer: context.pointer - 1,
@@ -128,6 +197,9 @@ export const machine = setup({
     pointer: 0,
     zeroHourTimestamp: 0,
     zeroHourBlockHeight: 0,
+    verificationProgress: 0,
+    IBDEstimationArray: [],
+    IBDEstimation: 0,
     ...input,
   }),
   id: "BlockClock",
@@ -136,8 +208,15 @@ export const machine = setup({
     [BlockClockState.Connecting]: {
       invoke: {
         onDone: [
-          { target: BlockClockState.WaitingIBD, guard: { type: "isIBD" } },
-          { target: BlockClockState.BlockTime },
+          {
+            target: BlockClockState.WaitingIBD,
+            guard: { type: "isIBD" },
+            actions: ["updateInfo", "addToIBDEstimation"],
+          },
+          {
+            target: BlockClockState.BlockTime,
+            actions: ["updateInfo", "addToIBDEstimation"],
+          },
         ],
         onError: {
           target: BlockClockState.ErrorConnecting,
@@ -146,28 +225,28 @@ export const machine = setup({
         input: ({ context }) => context,
       },
     },
-    [BlockClockState.ErrorConnecting]: {
-      after: {
-        "500": {
-          target: BlockClockState.Connecting,
-        },
-      },
-    },
+    [BlockClockState.ErrorConnecting]: {},
     [BlockClockState.WaitingIBD]: {
       initial: "Poll",
+      entry: ["resetIBDEstimation"],
       states: {
         Poll: {
           invoke: {
             input: ({ context }) => context,
             src: "fetchBlockchainInfo",
+            onError: {
+              target: `#BlockClock.${BlockClockState.ErrorConnecting}`,
+            },
             onDone: [
               {
                 target: "Poll Success",
+                actions: ["updateInfo", "addToIBDEstimation"],
                 guard: {
                   type: "isIBD",
                 },
               },
               {
+                actions: ["updateInfo"],
                 target: "#BlockClock.BlockTime",
               },
             ],
@@ -175,7 +254,7 @@ export const machine = setup({
         },
         "Poll Success": {
           after: {
-            "2000": {
+            2000: {
               target: "Poll",
             },
           },
@@ -184,7 +263,7 @@ export const machine = setup({
     },
     [BlockClockState.BlockTime]: {
       type: "parallel",
-      entry: ["updateInfo", "initPointer", "initZeroHourTimestamp"],
+      entry: ["initPointer", "initZeroHourTimestamp"],
       states: {
         BlockAggregator: {
           initial: "FullScan",

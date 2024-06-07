@@ -23,7 +23,7 @@ export async function fetch<T>({
   optionalHeaders,
 }: FetchOptions) {
   const fetchMethod = "POST";
-  const url = `https://${rpcEndpoint}`;
+  const url = rpcEndpoint;
   const body = {
     jsonrpc: "1.0",
     method,
@@ -33,12 +33,17 @@ export async function fetch<T>({
     method: fetchMethod,
     body: JSON.stringify(body),
   };
-  const headers: HeadersInit = {
+  let headers: HeadersInit = {
     ...optionalHeaders,
     "Content-Type": mimeType,
-    Authorization: `Basic ${btoa(`${rpcUser}:${rpcPassword}`)}`,
+    ...(rpcUser && rpcPassword
+      ? { Authorization: `Basic ${btoa(`${rpcUser}:${rpcPassword}`)}` }
+      : {}),
   };
+  console.log({ headers, url });
+
   const result = await window.fetch(url, { ...init, headers });
+  console.log({ result });
 
   if (!result.ok) {
     throw new Error(result.statusText || `${method} 😱 ${result.status}`);
