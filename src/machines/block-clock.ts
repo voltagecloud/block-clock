@@ -72,32 +72,6 @@ export const machine = setup({
         ];
       }
 
-      // let rateArray: number[] = [];
-      // if (IBDEstimationArray.length > 1) {
-      //   for (let i = 1; i < IBDEstimationArray.length - 1; i++) {
-      //     const prev = IBDEstimationArray[i - 1];
-      //     const curr = IBDEstimationArray[i];
-      //     const duration = curr.progressTakenAt - prev.progressTakenAt;
-      //     const progress = curr.progress - prev.progress;
-      //     if (progress < 0) {
-      //       rateArray = [...rateArray, 0];
-      //     } else {
-      //       const rateOfProgress = progress / duration;
-      //       rateArray = [...rateArray, rateOfProgress];
-      //     }
-      //   }
-      //   // Take the average of the rateArray
-      // }
-
-      // if (rateArray.length) {
-      //   const averageRate =
-      //     rateArray.reduce((a, b) => a + b, 0) / rateArray.length;
-      //   const remainingProgress = 1 - event.output.verificationprogress;
-      //   remainingTime = remainingProgress / averageRate;
-      // }
-
-      // console.log(rateArray);
-
       let IBDEstimation = 0;
       if (IBDEstimationArray.length > 1) {
         const first = IBDEstimationArray[0];
