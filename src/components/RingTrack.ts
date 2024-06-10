@@ -9,9 +9,9 @@ export interface RingTrackProps {
 
 export const RingTrack = ({ ringWidth, size, withPoints }: RingTrackProps) => {
   const pointScale = 0.25;
-  const pointArrays = [0, 45, 90, 135, 180, 225, 270, 315].map((angle) =>
-    convertAngleToCxCyAroundCircle(angle, ringWidth)
-  );
+  const pointArrays = [
+    30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360,
+  ].map((angle) => convertAngleToCxCyAroundCircle(angle, ringWidth));
   const pointSize = ringWidth * size * pointScale;
   return html`
     <svg viewBox="0 0 100 100" style=${styleMap(styles.svg)}>
