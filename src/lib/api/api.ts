@@ -6,22 +6,27 @@ type RpcConfig = {
   rpcUser: string;
   rpcPassword: string;
   rpcEndpoint: string;
+  fetch?: Function;
 };
 
-type FetchOptions = RpcConfig & {
+type FetchOptions = {
   method: string;
   params?: unknown[];
   optionalHeaders?: HeadersInit;
 };
 
 export async function fetch<T>({
+  fetch,
   rpcUser,
   rpcPassword,
   rpcEndpoint,
   method,
   params,
   optionalHeaders,
-}: FetchOptions) {
+}: FetchOptions & RpcConfig) {
+  if (fetch) {
+    console.log("huuu", fetch(method, params));
+  }
   const fetchMethod = "POST";
   const url = rpcEndpoint;
   const body = {

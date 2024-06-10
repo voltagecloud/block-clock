@@ -1,10 +1,12 @@
 import { assign, fromPromise, not, sendTo, setup } from "xstate";
 import { getBlockStats, getBlockchainInfo } from "../lib/api/api";
-import { RpcConfig } from "./types";
 import { getMidnightOrMiddayTimestamp } from "../utils/time";
 
-const fetchBlockchainInfo = fromPromise(async ({ input }: { input: Context }) =>
-  getBlockchainInfo(input)
+const fetchBlockchainInfo = fromPromise(
+  async ({ input }: { input: Context }) => {
+    console.log({ input });
+    return getBlockchainInfo(input);
+  }
 );
 
 const fetchBlockStats = fromPromise(async ({ input }: { input: Context }) => {
@@ -14,6 +16,13 @@ const fetchBlockStats = fromPromise(async ({ input }: { input: Context }) => {
     ...input,
   });
 });
+
+export type RpcConfig = {
+  fetch?: Function;
+  rpcUser: string;
+  rpcPassword: string;
+  rpcEndpoint: string;
+};
 
 export type ZeroHourBlock = {
   height: number;
@@ -154,6 +163,11 @@ export const machine = setup({
         pointer: context.pointer - 1,
       };
     }),
+    updateConfig: assign(({ event }) => {
+      return {
+        ...event.config,
+      };
+    }),
   },
   actors: {
     fetchBlockchainInfo,
@@ -182,6 +196,7 @@ export const machine = setup({
   },
 }).createMachine({
   context: ({ input }) => ({
+    fetch: undefined,
     blocks: 0,
     headers: 0,
     zeroHourBlocks: [],
@@ -195,6 +210,14 @@ export const machine = setup({
   }),
   id: "BlockClock",
   initial: BlockClockState.Connecting,
+  on: {
+    SET_CONFIG: {
+      description:
+        "Allows the machine to be dynamically reconfigured with new RPC config",
+      target: `.${BlockClockState.Connecting}`,
+      actions: ["updateConfig"],
+    },
+  },
   states: {
     [BlockClockState.Connecting]: {
       always: [

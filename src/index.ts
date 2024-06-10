@@ -28,6 +28,7 @@ export class Index extends LitElement {
     mode: "closed",
   };
 
+  @property({ type: String }) fetch = "";
   @property({ type: String }) rpcEndpoint = "";
   @property({ type: String }) rpcUser = "";
   @property({ type: String }) rpcPassword = "";
@@ -66,6 +67,7 @@ export class Index extends LitElement {
   };
 
   connectedCallback(): void {
+    console.log(this.fetch);
     super.connectedCallback();
     this.blockClockActor = createActor(blockClockMachine, {
       input: {
@@ -120,6 +122,25 @@ export class Index extends LitElement {
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
+  }
+
+  attributeChangedCallback(
+    name: string,
+    _old: string | null,
+    value: string | null
+  ): void {
+    super.attributeChangedCallback(name, _old, value);
+    if (["rpcUser", "rpcPassword", "rpcEndpoint", "fetch"].includes(name)) {
+      this.blockClockActor?.send({
+        type: "SET_CONFIG",
+        config: {
+          fetch: eval(this.fetch),
+          rpcUser: this.rpcUser,
+          rpcPassword: this.rpcPassword,
+          rpcEndpoint: this.rpcEndpoint,
+        },
+      });
+    }
   }
 
   render() {

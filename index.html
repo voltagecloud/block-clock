@@ -16,16 +16,47 @@
         background-color: black;
       }
     </style>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const blockClock = document.querySelector("block-clock");
+        if (blockClock) {
+          blockClock.setAttribute("fetch", async (method, params) => {
+            const fetchMethod = "POST";
+            const url = "https://bitcoind-prune1100.m.staging.voltageapp.io";
+            const body = {
+              jsonrpc: "1.0",
+              method,
+              params,
+            };
+            const init = {
+              method: method,
+              body: JSON.stringify(body),
+            };
+            let headers = {
+              "Content-Type": "text/plain",
+              Authorization: `Basic ${btoa("frontend:quintet-chill-palatable-figment")}`,
+            };
+            const result = await window.fetch(url, { ...init, headers });
+            if (!result.ok) {
+              throw new Error(
+                result.statusText || `${method} 😱 ${result.status}`
+              );
+            }
+            const data = await result.json().catch();
+            if (data.error) {
+              throw new Error(
+                `Error ${data.error.code}: ${data.error.message}`
+              );
+            }
+            return data.result;
+          });
+        }
+      });
+    </script>
   </head>
   <body>
     <div style="width: 200px; height: 200px">
-      <block-clock
-        rpcUser="frontend"
-        rpcPassword="quintet-chill-palatable-figment"
-        rpcEndpoint="https://bitcoind-prune1100.m.staging.voltageapp.io"
-        darkMode
-      >
-      </block-clock>
+      <block-clock darkMode> </block-clock>
     </div>
   </body>
 </html>
