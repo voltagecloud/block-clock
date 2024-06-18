@@ -1,0 +1,50 @@
+html,
+:host {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: white;
+  text-align: left;
+}
+
+/** Theme */
+:host,
+:root {
+  --title-text-color: #333;
+  --subtitle-text-color: #666;
+  --bg-color: white;
+  --ring-track-color: #eee;
+  --ring-point-color: #aaa;
+}
+
+:host .dark,
+:root .dark {
+  --title-text-color: white;
+  --subtitle-text-color: #808080;
+  --bg-color: black;
+  --ring-track-color: #333;
+  --ring-point-color: #999;
+}
+
+/** Animations */
+@keyframes pulse {
+  0% {
+    opacity: 100%;
+  }
+  50% {
+    opacity: 50%;
+  }
+  100% {
+    opacity: 100%;
+  }
+}
+
+.animate-pulse {
+  animation-name: pulse;
+  animation-duration: 2s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1);
+  animation-iteration-count: infinite;
+}
