@@ -1,6 +1,10 @@
 import { assign, fromPromise, not, sendTo, setup } from "xstate";
-import { getBlockStats, getBlockchainInfo } from "../lib/api/api";
-import { RpcConfig } from "./types";
+import {
+  ProxyConfig,
+  RpcConfig,
+  getBlockStats,
+  getBlockchainInfo,
+} from "../lib/api/api";
 import { getTimestamp } from "../utils/time";
 
 const fetchBlockchainInfo = fromPromise(async ({ input }: { input: Context }) =>
@@ -32,19 +36,20 @@ export enum BlockClockState {
   LoadingBlocks = "LoadingBlocks",
 }
 
-export type Context = RpcConfig & {
-  blocks: number;
-  headers: number;
-  zeroHourBlocks: ZeroHourBlock[];
-  zeroHourTimestamp: number;
-  hasDoneFullScan?: boolean;
-  zeroHourBlockHeight: number;
-  pointer: number;
-  verificationProgress: number;
-  IBDEstimation?: number;
-  IBDEstimationArray: { progressTakenAt: number; progress: number }[];
-  oneHourIntervals: boolean;
-};
+export type Context = RpcConfig &
+  ProxyConfig & {
+    blocks: number;
+    headers: number;
+    zeroHourBlocks: ZeroHourBlock[];
+    zeroHourTimestamp: number;
+    hasDoneFullScan?: boolean;
+    zeroHourBlockHeight: number;
+    pointer: number;
+    verificationProgress: number;
+    IBDEstimation?: number;
+    IBDEstimationArray: { progressTakenAt: number; progress: number }[];
+    oneHourIntervals: boolean;
+  };
 
 function addBlockInCorrectPosition(
   zeroHourBlocks: ZeroHourBlock[],
@@ -67,7 +72,7 @@ function addBlockInCorrectPosition(
 export const machine = setup({
   types: {
     context: {} as Context,
-    input: {} as RpcConfig,
+    input: {} as RpcConfig & ProxyConfig,
   },
   actions: {
     addToIBDEstimation: assign(({ event, context }) => {
@@ -154,6 +159,9 @@ export const machine = setup({
         pointer: context.pointer - 1,
       };
     }),
+    logError: ({ event }) => {
+      console.error("Block Clock Error: ", event.error);
+    },
   },
   actors: {
     fetchBlockchainInfo,
@@ -228,6 +236,7 @@ export const machine = setup({
         ],
         onError: {
           target: BlockClockState.ErrorConnecting,
+          actions: ["logError"],
         },
         src: "fetchBlockchainInfo",
         input: ({ context }) => context,

@@ -2,7 +2,7 @@ import type { BlockStats, GetBlockchainInfoResponse } from "./types.ts";
 
 const mimeType = "text/plain";
 
-type RpcConfig = {
+export type RpcConfig = {
   rpcUser: string;
   rpcPassword: string;
   rpcEndpoint: string;
@@ -16,24 +16,24 @@ type FetchOptions = {
 
 type RpcFetchOptions = RpcConfig & FetchOptions;
 
-type ProxyConfig = {
-  proxyEndpoint: string;
+export type ProxyConfig = {
+  proxyUrl: string;
   token: string;
 };
 
 type ProxyFetchOptions = ProxyConfig & FetchOptions;
 
-type UniversalFetchOptions = RpcFetchOptions | ProxyFetchOptions;
+type UniversalFetchOptions = RpcFetchOptions & ProxyFetchOptions;
 
 export async function proxyFetch<T>({
-  proxyEndpoint,
+  proxyUrl,
   token,
   method,
   params,
   optionalHeaders,
 }: ProxyFetchOptions) {
   const fetchMethod = "POST";
-  const url = proxyEndpoint;
+  const url = proxyUrl;
   const body = {
     method,
     params,
@@ -100,13 +100,9 @@ export async function rpcFetch<T>({
 }
 
 export async function fetch<T>(options: UniversalFetchOptions): Promise<T> {
-  if ("proxyEndpoint" in options && "token" in options) {
+  if (options.proxyUrl && options.token) {
     return proxyFetch<T>(options);
-  } else if (
-    "rpcUser" in options &&
-    "rpcPassword" in options &&
-    "rpcEndpoint" in options
-  ) {
+  } else if (options.rpcUser && options.rpcPassword && options.rpcEndpoint) {
     return rpcFetch<T>(options);
   } else {
     throw new Error(
@@ -115,14 +111,14 @@ export async function fetch<T>(options: UniversalFetchOptions): Promise<T> {
   }
 }
 
-export async function getBlockchainInfo(config: RpcConfig) {
+export async function getBlockchainInfo(config: RpcConfig & ProxyConfig) {
   return fetch<GetBlockchainInfoResponse>({
     method: "getblockchaininfo",
     ...config,
   });
 }
 
-export async function getBestBlockHash(config: RpcConfig) {
+export async function getBestBlockHash(config: RpcConfig & ProxyConfig) {
   return fetch<string>({
     method: "getbestblockhash",
     ...config,
@@ -136,7 +132,8 @@ export async function getBlockStats({
 }: {
   hashOrHeight: number | string;
   stats: (keyof BlockStats)[];
-} & RpcConfig) {
+} & RpcConfig &
+  ProxyConfig) {
   return fetch<BlockStats>({
     method: "getblockstats",
     params: [hashOrHeight, stats],
