@@ -1,6 +1,6 @@
 import type { BlockStats, GetBlockchainInfoResponse } from "./types.ts";
 
-const mimeType = "text/plain";
+const mimeType = "application/json";
 
 export type RpcConfig = {
   rpcUser: string;
@@ -48,13 +48,14 @@ export async function proxyFetch<T>({
     },
   };
 
-  const result = await window.fetch(url, init);
+  const result = await window.fetch(url, { ...init });
 
   if (!result.ok) {
     throw new Error(result.statusText || `${method} 😱 ${result.status}`);
   }
 
-  return (await result.json()) as T;
+  const data = await result.json().catch();
+  return data.response as T;
 }
 
 export async function rpcFetch<T>({

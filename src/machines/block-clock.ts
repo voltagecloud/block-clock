@@ -6,6 +6,20 @@ import {
   getBlockchainInfo,
 } from "../lib/api/api";
 import { getTimestamp } from "../utils/time";
+import { clearCachedContext } from "../lib/storage";
+
+const initialContext = {
+  blocks: 0,
+  headers: 0,
+  zeroHourBlocks: [],
+  pointer: 0,
+  zeroHourTimestamp: 0,
+  zeroHourBlockHeight: 0,
+  verificationProgress: 0,
+  IBDEstimationArray: [],
+  IBDEstimation: 0,
+  oneHourIntervals: false,
+};
 
 const fetchBlockchainInfo = fromPromise(async ({ input }: { input: Context }) =>
   getBlockchainInfo(input)
@@ -75,6 +89,10 @@ export const machine = setup({
     input: {} as RpcConfig & ProxyConfig,
   },
   actions: {
+    resetAll: assign(() => {
+      clearCachedContext();
+      return initialContext;
+    }),
     addToIBDEstimation: assign(({ event, context }) => {
       // Keep an array of 10 estimations
       let IBDEstimationArray;
@@ -168,7 +186,9 @@ export const machine = setup({
     fetchBlockStats,
   },
   guards: {
-    isIBD: ({ event }) => event.output.initialblockdownload,
+    isIBD: ({ event }) => {
+      return event.output.initialblockdownload;
+    },
     isZeroHourBlocksStale: function ({
       context: { zeroHourTimestamp, oneHourIntervals },
     }) {
@@ -192,20 +212,17 @@ export const machine = setup({
   },
 }).createMachine({
   context: ({ input }) => ({
-    blocks: 0,
-    headers: 0,
-    zeroHourBlocks: [],
-    pointer: 0,
-    zeroHourTimestamp: 0,
-    zeroHourBlockHeight: 0,
-    verificationProgress: 0,
-    IBDEstimationArray: [],
-    IBDEstimation: 0,
-    oneHourIntervals: false,
+    ...initialContext,
     ...input,
   }),
   id: "BlockClock",
   initial: BlockClockState.Connecting,
+  on: {
+    RESET: {
+      target: `.${BlockClockState.Connecting}`,
+      actions: ["resetAll"],
+    },
+  },
   states: {
     [BlockClockState.Connecting]: {
       always: [
