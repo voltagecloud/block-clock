@@ -71,6 +71,8 @@ export class Index extends LitElement {
         rpcUser: this.rpcUser,
         rpcPassword: this.rpcPassword,
         rpcEndpoint: this.rpcEndpoint,
+        proxyUrl: this.proxyUrl,
+        token: this.token,
         oneHourIntervals: this.oneHourIntervals,
         // Load context cache from local storage
         ...getCachedContext(),
