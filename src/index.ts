@@ -136,6 +136,10 @@ export class Index extends LitElement {
           ${this.snapshot.matches("BlockTime.PollBlockchainInfo.Poll")}
         </div>
         <div>
+          <b>Polling blockchain info:</b>
+          ${this.snapshot.matches("BlockTime.PollBlockchainInfo.Poll")}
+        </div>
+        <div>
           <b>Waiting to Scan Blocks:</b>
           ${this.snapshot.matches("BlockTime.ScanBlocks.Wait")}
         </div>
@@ -206,7 +210,13 @@ function getCachedContext(): any | {} {
 }
 
 function updateCachedContext(newContext: any) {
-  const excludeKeys = ["rpcUser", "rpcPassword", "rpcEndpoint"];
+  const excludeKeys = [
+    "rpcUser",
+    "rpcPassword",
+    "rpcEndpoint",
+    "token",
+    "proxyUrl",
+  ];
   const filteredContext = Object.keys(newContext)
     .filter((key) => !excludeKeys.includes(key))
     .reduce((obj: any, key: any) => {
