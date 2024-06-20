@@ -6,6 +6,7 @@ import {
   getBlockchainInfo,
 } from "../lib/api/api";
 import { getTimestamp } from "../utils/time";
+import { clearCachedContext } from "../lib/storage";
 
 const initialContext = {
   blocks: 0,
@@ -89,7 +90,7 @@ export const machine = setup({
   },
   actions: {
     resetAll: assign(() => {
-      console.log("RESETTING ALL");
+      clearCachedContext();
       return initialContext;
     }),
     addToIBDEstimation: assign(({ event, context }) => {
@@ -186,7 +187,6 @@ export const machine = setup({
   },
   guards: {
     isIBD: ({ event }) => {
-      console.log(event);
       return event.output.initialblockdownload;
     },
     isZeroHourBlocksStale: function ({

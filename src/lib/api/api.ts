@@ -48,7 +48,6 @@ export async function proxyFetch<T>({
     },
   };
 
-  console.log("Proxy fetch", { url, init });
   const result = await window.fetch(url, { ...init });
 
   if (!result.ok) {
@@ -102,12 +101,9 @@ export async function rpcFetch<T>({
 }
 
 export async function fetch<T>(options: UniversalFetchOptions): Promise<T> {
-  console.log({ options });
   if (options.proxyUrl && options.token) {
-    console.log("proxyFetch");
     return proxyFetch<T>(options);
   } else if (options.rpcUser && options.rpcPassword && options.rpcEndpoint) {
-    console.log("rpcFetch");
     return rpcFetch<T>(options);
   } else {
     throw new Error(

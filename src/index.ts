@@ -9,8 +9,8 @@ import {
   machine as blockClockMachine,
 } from "./machines/block-clock";
 import { DEFAULT_THEME } from "./utils/constants";
-import { objectsEqual } from "./utils/assert";
 import { calculateRadialTimeDifferences } from "./utils/math";
+import { getCachedContext, updateCachedContext } from "./lib/storage";
 
 declare global {
   interface Window {
@@ -66,22 +66,27 @@ export class Index extends LitElement {
 
   connectedCallback(): void {
     super.connectedCallback();
+    const cache = getCachedContext();
+    // Conditions to ignore cache are usually when a different node is being loaded
+    // but the local storage cache doesn't correspond to it.
+    const ignoreCache =
+      cache.oneHourIntervals !== this.oneHourIntervals ||
+      cache.rpcEndpoint !== this.rpcEndpoint ||
+      cache.proxyUrl !== this.proxyUrl;
+    let machineInput = {
+      ...(ignoreCache ? {} : getCachedContext()),
+      rpcUser: this.rpcUser,
+      rpcPassword: this.rpcPassword,
+      rpcEndpoint: this.rpcEndpoint,
+      proxyUrl: this.proxyUrl,
+      token: this.token,
+      oneHourIntervals: this.oneHourIntervals,
+    };
     this.blockClockActor = createActor(blockClockMachine, {
-      input: {
-        rpcUser: this.rpcUser,
-        rpcPassword: this.rpcPassword,
-        rpcEndpoint: this.rpcEndpoint,
-        proxyUrl: this.proxyUrl,
-        token: this.token,
-        oneHourIntervals: this.oneHourIntervals,
-        // Load context cache from local storage
-        ...getCachedContext(),
-      },
+      input: machineInput,
     });
     this.blockClockActor.subscribe((snapshot) => {
       if (this.devMode) {
-        console.log({ snapshot });
-        console.log(snapshot.value["BlockTime"]);
         window.blockClockActor = this.blockClockActor;
         window.clearStorageAndReload = () => {
           localStorage.clear();
@@ -192,39 +197,5 @@ export class Index extends LitElement {
 declare global {
   interface HTMLElementTagNameMap {
     "block-clock": Index;
-  }
-}
-
-// This is temporarily here for debugging purposes because if your local time just past
-// the midnight or midday mark, none or almost no blocks will be fetched to display the
-// block time ring segments.
-// function get11HoursAgoTimestamp() {
-//   const now = new Date();
-//   const twelveHoursAgo = new Date(now);
-//   twelveHoursAgo.setHours(now.getHours() - 11);
-//   return twelveHoursAgo.getTime();
-// }
-
-function getCachedContext(): any | {} {
-  return JSON.parse(localStorage.getItem("blockClockContext") || "{}");
-}
-
-function updateCachedContext(newContext: any) {
-  const excludeKeys = [
-    "rpcUser",
-    "rpcPassword",
-    "rpcEndpoint",
-    "token",
-    "proxyUrl",
-  ];
-  const filteredContext = Object.keys(newContext)
-    .filter((key) => !excludeKeys.includes(key))
-    .reduce((obj: any, key: any) => {
-      obj[key] = newContext[key];
-      return obj;
-    }, {});
-
-  if (!objectsEqual(getCachedContext(), filteredContext)) {
-    localStorage.setItem("blockClockContext", JSON.stringify(filteredContext));
   }
 }
