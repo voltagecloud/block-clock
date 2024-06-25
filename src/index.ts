@@ -129,6 +129,7 @@ export class Index extends LitElement {
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
+    this.blockClockActor?.stop();
   }
 
   render() {
