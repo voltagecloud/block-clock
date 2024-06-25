@@ -126,7 +126,7 @@ export class Index extends LitElement {
   render() {
     const devTools = html`
       <div
-        style="font-size: 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 4px;"
+        style="font-size: 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 4px; color: var(--title-text-color);"
       >
         <div>
           <b>Connect error count:</b>

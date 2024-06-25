@@ -183,6 +183,13 @@ yarn storybook
 
 If you find a problem, please [open an issue](https://github.com/voltagecloud/block-clock/issues/new). PRs welcome!
 
+## Publishing
+
+```bash
+npm run build
+npm run publish
+```
+
 ## License
 
 MIT
