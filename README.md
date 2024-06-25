@@ -35,7 +35,7 @@ A customizable, zero-dependency clock for your Bitcoin Core node.
 ```html
 <script
   type="module"
-  src="https://unpkg.com/block-clock@0.0.4/dist/index.js"
+  src="https://unpkg.com/block-clock/dist/index.js"
 ></script>
 ```
 
