@@ -75,6 +75,7 @@ function getClock({
         darkMode,
       });
     case BlockClockState.Connecting:
+    case BlockClockState.ConnectingRetry:
       return BlockClockFrame({
         ringWidth,
         top: Logo({ logo: LogoType.Bitcoin }),

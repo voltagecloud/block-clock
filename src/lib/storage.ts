@@ -11,15 +11,13 @@ export function getCachedContext(): any | {} {
 }
 
 export function updateCachedContext(newContext: any) {
-  const excludeKeys = ["rpcUser", "rpcPassword"];
-
+  const excludeKeys = ["rpcUser", "rpcPassword", "connectErrorCount"];
   const filteredContext = Object.keys(newContext)
     .filter((key) => !excludeKeys.includes(key))
     .reduce((obj: any, key: any) => {
       obj[key] = newContext[key];
       return obj;
     }, {});
-
   if (!objectsEqual(getCachedContext(), filteredContext)) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(filteredContext));
   }
