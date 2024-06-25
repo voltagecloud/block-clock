@@ -8,6 +8,9 @@ import {
 import { getTimestamp } from "../utils/time";
 import { clearCachedContext } from "../lib/storage";
 
+const MAX_CONNECT_ERROR_COUNT = 5;
+const POLL_WAIT_TIME = 2000;
+
 const initialContext = {
   blocks: 0,
   headers: 0,
@@ -19,6 +22,7 @@ const initialContext = {
   IBDEstimationArray: [],
   IBDEstimation: 0,
   oneHourIntervals: false,
+  connectErrorCount: 0,
 };
 
 const fetchBlockchainInfo = fromPromise(async ({ input }: { input: Context }) =>
@@ -41,11 +45,11 @@ export type ZeroHourBlock = {
 
 export enum BlockClockState {
   Connecting = "Connecting",
+  ConnectingRetry = "ConnectingRetry",
   ErrorConnecting = "ErrorConnecting",
   WaitingIBD = "WaitingIBD",
   Downloading = "Downloading",
   BlockTime = "BlockTime",
-
   Stopped = "Stopped",
   LoadingBlocks = "LoadingBlocks",
 }
@@ -63,6 +67,7 @@ export type Context = RpcConfig &
     IBDEstimation?: number;
     IBDEstimationArray: { progressTakenAt: number; progress: number }[];
     oneHourIntervals: boolean;
+    connectErrorCount: number;
   };
 
 function addBlockInCorrectPosition(
@@ -89,6 +94,12 @@ export const machine = setup({
     input: {} as RpcConfig & ProxyConfig,
   },
   actions: {
+    resetConnectErrorCount: assign(() => ({
+      connectErrorCount: 0,
+    })),
+    incrementConnectErrorCount: assign(({ context }) => ({
+      connectErrorCount: context.connectErrorCount + 1,
+    })),
     resetAll: assign(() => {
       clearCachedContext();
       return initialContext;
@@ -186,6 +197,8 @@ export const machine = setup({
     fetchBlockStats,
   },
   guards: {
+    hasExceededConnectErrorCount: ({ context }) =>
+      context.connectErrorCount >= MAX_CONNECT_ERROR_COUNT - 1,
     isIBD: ({ event }) => {
       return event.output.initialblockdownload;
     },
@@ -220,7 +233,7 @@ export const machine = setup({
   on: {
     RESET: {
       target: `.${BlockClockState.Connecting}`,
-      actions: ["resetAll"],
+      actions: ["resetAll", "resetConnectErrorCount"],
     },
   },
   states: {
@@ -251,12 +264,26 @@ export const machine = setup({
             actions: ["updateInfo", "addToIBDEstimation"],
           },
         ],
-        onError: {
-          target: BlockClockState.ErrorConnecting,
-          actions: ["logError"],
-        },
+        onError: [
+          {
+            guard: "hasExceededConnectErrorCount",
+            target: BlockClockState.ErrorConnecting,
+            actions: ["logError"],
+          },
+          {
+            target: BlockClockState.ConnectingRetry,
+            actions: ["incrementConnectErrorCount"],
+          },
+        ],
         src: "fetchBlockchainInfo",
         input: ({ context }) => context,
+      },
+    },
+    [BlockClockState.ConnectingRetry]: {
+      after: {
+        [POLL_WAIT_TIME]: {
+          target: BlockClockState.Connecting,
+        },
       },
     },
     [BlockClockState.ErrorConnecting]: {},
@@ -288,7 +315,7 @@ export const machine = setup({
         },
         "Poll Success": {
           after: {
-            2000: {
+            [POLL_WAIT_TIME]: {
               target: "Poll",
             },
           },
@@ -385,7 +412,7 @@ export const machine = setup({
             },
             Waiting: {
               after: {
-                "2000": {
+                [POLL_WAIT_TIME]: {
                   target: "Poll",
                 },
               },

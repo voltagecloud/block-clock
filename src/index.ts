@@ -47,21 +47,12 @@ export class Index extends LitElement {
   blockClockActor: Actor<typeof blockClockMachine> | undefined;
 
   getBlockClockState = (snapshot: any) => {
-    if (snapshot.matches(BlockClockState.Stopped)) {
-      return BlockClockState.Stopped;
-    } else if (snapshot.matches(BlockClockState.Connecting)) {
-      return BlockClockState.Connecting;
-    } else if (snapshot.matches(BlockClockState.LoadingBlocks)) {
-      return BlockClockState.LoadingBlocks;
-    } else if (snapshot.matches(BlockClockState.Downloading)) {
-      return BlockClockState.Downloading;
-    } else if (snapshot.matches(BlockClockState.BlockTime)) {
-      return BlockClockState.BlockTime;
-    } else if (snapshot.matches(BlockClockState.WaitingIBD)) {
-      return BlockClockState.WaitingIBD;
-    } else if (snapshot.matches(BlockClockState.ErrorConnecting)) {
-      return BlockClockState.ErrorConnecting;
+    for (const k in BlockClockState) {
+      if (snapshot.matches(BlockClockState[k])) {
+        return k as BlockClockState;
+      }
     }
+    throw new Error("Unknown state");
   };
 
   connectedCallback(): void {
@@ -138,8 +129,8 @@ export class Index extends LitElement {
         style="font-size: 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 4px;"
       >
         <div>
-          <b>Polling blockchain info:</b>
-          ${this.snapshot.matches("BlockTime.PollBlockchainInfo.Poll")}
+          <b>Connect error count:</b>
+          ${this.snapshot.context.connectErrorCount}
         </div>
         <div>
           <b>Polling blockchain info:</b>
