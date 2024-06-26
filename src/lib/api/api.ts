@@ -47,14 +47,14 @@ export async function proxyFetch<T>({
       Authorization: `Bearer ${token}`,
     },
   };
-
   const result = await window.fetch(url, { ...init });
-
   if (!result.ok) {
     throw new Error(result.statusText || `${method} 😱 ${result.status}`);
   }
-
   const data = await result.json().catch();
+  if (data.response.hasOwnProperty("code")) {
+    throw new Error(`Error ${data.response.code}: ${data.response.message}`);
+  }
   return data.response as T;
 }
 
@@ -84,19 +84,14 @@ export async function rpcFetch<T>({
       ? { Authorization: `Basic ${btoa(`${rpcUser}:${rpcPassword}`)}` }
       : {}),
   };
-
   const result = await window.fetch(url, { ...init, headers });
-
   if (!result.ok) {
     throw new Error(result.statusText || `${method} 😱 ${result.status}`);
   }
-
   const data = await result.json().catch();
-
-  if (data.error) {
-    throw new Error(`Error ${data.error.code}: ${data.error.message}`);
+  if (data.response.hasOwnProperty("code")) {
+    throw new Error(`Error ${data.response.code}: ${data.response.message}`);
   }
-
   return data.result as T;
 }
 
