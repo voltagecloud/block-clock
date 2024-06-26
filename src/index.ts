@@ -1,6 +1,6 @@
 import { LitElement, html, unsafeCSS } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import { Actor, createActor } from "xstate";
+import { Actor, Subscription, createActor } from "xstate";
 import { BlockClock } from "./components/BlockClock";
 import style from "./index.css?inline";
 import {
@@ -45,6 +45,8 @@ export class Index extends LitElement {
   @state() snapshot: any;
 
   blockClockActor: Actor<typeof blockClockMachine> | undefined;
+  blockClockSub: Subscription | undefined;
+  segmentBuilderIntervalId: NodeJS.Timeout | undefined;
 
   getBlockClockState = (snapshot: any) => {
     for (const k in BlockClockState) {
@@ -76,7 +78,7 @@ export class Index extends LitElement {
     this.blockClockActor = createActor(blockClockMachine, {
       input: machineInput,
     });
-    this.blockClockActor.subscribe((snapshot) => {
+    this.blockClockSub = this.blockClockActor.subscribe((snapshot) => {
       if (this.devMode) {
         window.blockClockActor = this.blockClockActor;
         window.clearStorageAndReload = () => {
@@ -99,7 +101,7 @@ export class Index extends LitElement {
     this.initRingSegmentBuilder();
   }
 
-  initRingSegmentBuilder() {
+  buildRingSegments() {
     if (this.blockClockContext) {
       this.ringSegments = calculateRadialTimeDifferences(
         this.blockClockContext.zeroHourBlocks,
@@ -107,20 +109,21 @@ export class Index extends LitElement {
         this.blockClockContext.oneHourIntervals ? 1 : 12
       );
     }
-    setInterval(() => {
-      if (this.blockClockContext) {
-        this.ringSegments = calculateRadialTimeDifferences(
-          this.blockClockContext.zeroHourBlocks,
-          this.blockClockContext.zeroHourTimestamp,
-          this.blockClockContext.oneHourIntervals ? 1 : 12
-        );
-      }
-    }, 1000);
+  }
+
+  initRingSegmentBuilder() {
+    this.buildRingSegments();
+    this.segmentBuilderIntervalId = setInterval(
+      () => this.buildRingSegments(),
+      1000
+    );
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
+    this.blockClockSub?.unsubscribe();
     this.blockClockActor?.stop();
+    clearInterval(this.segmentBuilderIntervalId);
   }
 
   render() {
