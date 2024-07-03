@@ -11,7 +11,14 @@ export function getCachedContext(): any | {} {
 }
 
 export function updateCachedContext(newContext: any) {
-  const excludeKeys = ["rpcUser", "rpcPassword", "connectErrorCount"];
+  const excludeKeys = [
+    "rpcEndpoint",
+    "rpcUser",
+    "rpcPassword",
+    "connectErrorCount",
+    "proxyUrl",
+    "token",
+  ];
   const filteredContext = Object.keys(newContext)
     .filter((key) => !excludeKeys.includes(key))
     .reduce((obj: any, key: any) => {
