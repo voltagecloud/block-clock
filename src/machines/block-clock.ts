@@ -367,11 +367,12 @@ export const machine = setup({
                     actions: ["addBlock", "decrementPointer"],
                   },
                 ],
-                onError: "Error",
+                onError: {
+                  target: `#BlockClock.${BlockClockState.Connecting}`,
+                },
                 src: "fetchBlockStats",
               },
             },
-            Error: {},
             WatchUpdates: {
               on: {
                 BLOCKCHAIN_INFO_UPDATED: [
