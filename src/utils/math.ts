@@ -16,11 +16,15 @@ export function calculateRadialTimeDifferences(
     }
     return calculateRadialAngle(block.time - arr[i - 1].time, zeroHourInterval);
   });
+  // Calculate the next zeroHourTimestamp
+  const nextZeroHourTimestamp =
+    zeroHourTimestamp + zeroHourInterval * 60 * 60 * 1000;
   if (differences.length > 0) {
     // Include one last segment with a diff of the last block with the current time
     differences.push(
       calculateRadialAngle(
-        Math.floor(Date.now() / 1000) - blocks[blocks.length - 1].time,
+        Math.floor(Math.min(nextZeroHourTimestamp, Date.now()) / 1000) -
+          blocks[blocks.length - 1].time,
         zeroHourInterval
       )
     );
@@ -28,7 +32,8 @@ export function calculateRadialTimeDifferences(
     // If there are no blocks, include one segment that draws from the zeroHourTimestamp to now
     differences.push(
       calculateRadialAngle(
-        Math.floor(Date.now() / 1000) - zeroHourTimestamp / 1000,
+        Math.floor(Math.min(nextZeroHourTimestamp, Date.now()) / 1000) -
+          zeroHourTimestamp / 1000,
         zeroHourInterval
       )
     );
