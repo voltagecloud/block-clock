@@ -81,6 +81,7 @@ export class Index extends LitElement {
     this.blockClockSub = this.blockClockActor.subscribe((snapshot) => {
       if (this.devMode) {
         window.blockClockActor = this.blockClockActor;
+        window.blockClockSnapshot = snapshot;
         window.clearStorageAndReload = () => {
           localStorage.clear();
           location.reload();

@@ -147,6 +147,7 @@ export const machine = setup({
     resetIBDEstimation: assign({ IBDEstimationArray: [], IBDEstimation: 0 }),
     updateInfo: assign(({ event }) => ({
       blocks: event.output.blocks,
+      headers: event.output.headers,
       verificationProgress: event.output.verificationprogress,
     })),
     setZeroHourBlockHeight: assign(({ context }) => {
@@ -296,7 +297,8 @@ export const machine = setup({
             input: ({ context }) => context,
             src: "fetchBlockchainInfo",
             onError: {
-              target: `#BlockClock.${BlockClockState.ErrorConnecting}`,
+              target: `#BlockClock.${BlockClockState.Connecting}`,
+              actions: ["logError"],
             },
             onDone: [
               {

@@ -52,6 +52,20 @@ function isSyncingHeaders({
   return (!blocks && !headers) || (!blocks && headers);
 }
 
+// This happens when verification progress = 1, blocks < headers and initial block download = 1
+function isSnapshottingBlocks({
+  blocks,
+  headers,
+  downloadProgress,
+}: {
+  blocks: number | undefined;
+  headers: number | undefined;
+  downloadProgress: number | undefined;
+}) {
+  console.log(blocks, headers, downloadProgress);
+  return downloadProgress == 1 && (blocks || 0) < (headers || 0);
+}
+
 function getClock({
   stoppedReason,
   ringWidth,
@@ -64,6 +78,20 @@ function getClock({
   darkMode,
 }: BlockClockProps) {
   const _isSyncingHeaders = isSyncingHeaders({ blocks, headers });
+  const _isSnapshottingBlocks = isSnapshottingBlocks({
+    blocks,
+    headers,
+    downloadProgress,
+  });
+  let _downloadProgress = 0;
+  if (_isSnapshottingBlocks) {
+    // Use blocks / headers ratio as download progress if snapshotting
+    if (headers) {
+      _downloadProgress = (blocks || 0) / headers;
+    }
+  } else {
+    _downloadProgress = downloadProgress;
+  }
   switch (state) {
     case BlockClockState.Stopped:
       return BlockClockFrame({
@@ -106,7 +134,7 @@ function getClock({
         ringWidth,
         ring: _isSyncingHeaders
           ? undefined
-          : Ring({ ringFillAngle: downloadProgress * 100 * 3.6, ringWidth }),
+          : Ring({ ringFillAngle: _downloadProgress * 100 * 3.6, ringWidth }),
         top: Logo({ logo: LogoType.Bitcoin }),
         middle: Title({
           text: _isSyncingHeaders ? "Syncing" : "Downloading",
@@ -114,7 +142,7 @@ function getClock({
         lowerMiddle: Subtitle({
           text: _isSyncingHeaders
             ? "Please Wait"
-            : `${roundToDecimalPoints(downloadProgress * 100, 2)}%`,
+            : `${roundToDecimalPoints(_downloadProgress * 100, 2)}%`,
         }),
         bottom: IndicatorLoading(),
         darkMode,
