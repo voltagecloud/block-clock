@@ -59,7 +59,6 @@ function isSnapshottingBlocks({
   headers: number | undefined;
   downloadProgress: number | undefined;
 }) {
-  console.log(blocks, headers, downloadProgress);
   return downloadProgress == 1 && (blocks || 0) < (headers || 0);
 }
 
