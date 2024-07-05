@@ -236,6 +236,9 @@ export const machine = setup({
       target: `.${BlockClockState.Connecting}`,
       actions: ["resetAll", "resetConnectErrorCount"],
     },
+    SET_TOKEN: {
+      actions: assign(({ event: { token } }) => ({ token })),
+    },
   },
   states: {
     [BlockClockState.Connecting]: {
@@ -258,18 +261,25 @@ export const machine = setup({
           {
             target: BlockClockState.WaitingIBD,
             guard: { type: "isIBD" },
-            actions: ["updateInfo", "addToIBDEstimation"],
+            actions: [
+              "updateInfo",
+              "addToIBDEstimation",
+              "resetConnectErrorCount",
+            ],
           },
           {
             target: BlockClockState.BlockTime,
-            actions: ["updateInfo", "addToIBDEstimation"],
+            actions: [
+              "updateInfo",
+              "addToIBDEstimation",
+              "resetConnectErrorCount",
+            ],
           },
         ],
         onError: [
           {
-            guard: "hasExceededConnectErrorCount",
             target: BlockClockState.ErrorConnecting,
-            actions: ["logError"],
+            guard: "hasExceededConnectErrorCount",
           },
           {
             target: BlockClockState.ConnectingRetry,
@@ -287,7 +297,10 @@ export const machine = setup({
         },
       },
     },
-    [BlockClockState.ErrorConnecting]: {},
+    [BlockClockState.ErrorConnecting]: {
+      type: "final",
+      entry: ["logError"],
+    },
     [BlockClockState.WaitingIBD]: {
       initial: "Poll",
       entry: ["resetIBDEstimation"],
@@ -296,26 +309,36 @@ export const machine = setup({
           invoke: {
             input: ({ context }) => context,
             src: "fetchBlockchainInfo",
-            onError: {
-              target: `#BlockClock.${BlockClockState.Connecting}`,
-              actions: ["logError"],
-            },
+            onError: [
+              {
+                guard: "hasExceededConnectErrorCount",
+                target: `#BlockClock.${BlockClockState.ErrorConnecting}`,
+              },
+              {
+                target: "Wait",
+                actions: ["incrementConnectErrorCount"],
+              },
+            ],
             onDone: [
               {
-                target: "Poll Success",
-                actions: ["updateInfo", "addToIBDEstimation"],
+                target: "Wait",
+                actions: [
+                  "updateInfo",
+                  "addToIBDEstimation",
+                  "resetConnectErrorCount",
+                ],
                 guard: {
                   type: "isIBD",
                 },
               },
               {
-                actions: ["updateInfo"],
+                actions: ["updateInfo", "resetConnectErrorCount"],
                 target: "#BlockClock.BlockTime",
               },
             ],
           },
         },
-        "Poll Success": {
+        Wait: {
           after: {
             [POLL_WAIT_TIME]: {
               target: "Poll",
@@ -369,10 +392,22 @@ export const machine = setup({
                     actions: ["addBlock", "decrementPointer"],
                   },
                 ],
-                onError: {
-                  target: `#BlockClock.${BlockClockState.Connecting}`,
-                },
+                onError: [
+                  {
+                    // NOTE: Don't increment connect error here because blockchain info poller
+                    // will handle that and eventually send to error connecting if that's the case.
+                    target: "FetchError",
+                  },
+                ],
                 src: "fetchBlockStats",
+              },
+            },
+            FetchError: {
+              after: {
+                // When a fetch error happens, back off a bit then go back to full scan to check
+                // reset conditions before resuming fetching attempt. The key is not to reset pointer
+                // so that we can resume the previous full scan.
+                [POLL_WAIT_TIME]: "FullScan",
               },
             },
             WatchUpdates: {
@@ -392,28 +427,40 @@ export const machine = setup({
           states: {
             Poll: {
               invoke: {
+                src: "fetchBlockchainInfo",
                 input: ({ context }) => context,
                 onDone: [
                   {
                     target: "#BlockClock.WaitingIBD",
+                    actions: ["resetConnectErrorCount"],
                     guard: {
                       type: "isIBD",
                     },
                   },
                   {
-                    target: "Waiting",
+                    target: "Wait",
                     actions: [
                       "updateInfo",
                       sendTo(({ event }: any) => event.sender, {
                         type: "BLOCKCHAIN_INFO_UPDATED",
                       }),
+                      "resetConnectErrorCount",
                     ],
                   },
                 ],
-                src: "fetchBlockchainInfo",
+                onError: [
+                  {
+                    guard: "hasExceededConnectErrorCount",
+                    target: `#BlockClock.${BlockClockState.ErrorConnecting}`,
+                  },
+                  {
+                    target: "Wait",
+                    actions: ["incrementConnectErrorCount"],
+                  },
+                ],
               },
             },
-            Waiting: {
+            Wait: {
               after: {
                 [POLL_WAIT_TIME]: {
                   target: "Poll",

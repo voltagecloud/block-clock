@@ -1,4 +1,4 @@
-import { LitElement, html, unsafeCSS } from "lit";
+import { LitElement, PropertyValueMap, html, unsafeCSS } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { Actor, Subscription, createActor } from "xstate";
 import { BlockClock } from "./components/BlockClock";
@@ -125,6 +125,15 @@ export class Index extends LitElement {
     this.blockClockSub?.unsubscribe();
     this.blockClockActor?.stop();
     clearInterval(this.segmentBuilderIntervalId);
+  }
+
+  protected update(
+    _changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>
+  ): void {
+    super.update(_changedProperties);
+    if (_changedProperties.has("token")) {
+      this.blockClockActor?.send({ type: "SET_TOKEN", token: this.token });
+    }
   }
 
   render() {
