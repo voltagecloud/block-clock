@@ -4,14 +4,11 @@ import { Logo, LogoType } from "./Logo.ts";
 import { BlockClockFrame } from "./BlockClockFrame.ts";
 import { Title } from "./Title.ts";
 import { Subtitle } from "./Subtitle.ts";
-import { IndicatorLoading } from "./IndicatorLoading.ts";
 import { Ring } from "./Ring.ts";
 import { RingSegmented } from "./RingSegmented.ts";
 import { numberWithCommas, roundToDecimalPoints } from "../utils/format.ts";
 import { BlockClockState } from "../machines/block-clock.ts";
-import { IndicatorPeers } from "./IndicatorPeers.ts";
 import { RingTrack } from "./RingTrack.ts";
-import { IndicatorInactive } from "./IndicatorInactive.ts";
 
 export interface BlockClockProps {
   state: BlockClockState;
@@ -99,7 +96,7 @@ function getClock({
         top: Logo({ logo: getLogoTypeFromStoppedReason(stoppedReason) }),
         middle: Title({ text: "Stopped" }),
         lowerMiddle: Subtitle({ text: stoppedReason }),
-        bottom: IndicatorInactive(),
+        // bottom: IndicatorInactive(),
         darkMode,
       });
     case BlockClockState.Connecting:
@@ -109,7 +106,7 @@ function getClock({
         top: Logo({ logo: LogoType.Bitcoin }),
         middle: Title({ text: "Connecting" }),
         lowerMiddle: Subtitle({ text: "Please Wait" }),
-        bottom: IndicatorLoading(),
+        // bottom: IndicatorLoading(),
         darkMode,
       });
     case BlockClockState.LoadingBlocks:
@@ -118,7 +115,7 @@ function getClock({
         top: Logo({ logo: LogoType.Bitcoin }),
         middle: Title({ text: "Loading Blocks" }),
         lowerMiddle: Subtitle({ text: "Please Wait" }),
-        bottom: IndicatorLoading(),
+        // bottom: IndicatorLoading(),
         darkMode,
       });
     case BlockClockState.ErrorConnecting:
@@ -144,7 +141,7 @@ function getClock({
             ? "Please Wait"
             : `${roundToDecimalPoints(_downloadProgress * 100, 2)}%`,
         }),
-        bottom: IndicatorLoading(),
+        // bottom: IndicatorLoading(),
         darkMode,
       });
     default:
@@ -155,7 +152,7 @@ function getClock({
         top: Logo({ logo: LogoType.Bitcoin }),
         middle: Title({ text: numberWithCommas(blocks), scale: 1.2 }),
         lowerMiddle: Subtitle({ text: `Blocktime` }),
-        bottom: IndicatorPeers(),
+        // bottom: IndicatorPeers(),
         darkMode,
       });
   }
