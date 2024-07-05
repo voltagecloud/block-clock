@@ -39,6 +39,19 @@ A customizable, zero-dependency clock for your Bitcoin Core node.
 ></script>
 ```
 
+For extra security, add sub-resource integrity by calculating the sha384 of the js file:
+`cat block-clock-index.js | openssl dgst -sha384 -binary | openssl base64 -A`
+
+Then use it in the script property:
+
+```html
+<script
+  type="module"
+  src="https://unpkg.com/block-clock/dist/index.js"
+  integrity="sha384-YOURCOMPUTEDSHA384"
+></script>
+```
+
 ### NPM
 
 ```bash
