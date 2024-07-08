@@ -24,6 +24,26 @@ export const BlockClockFrame = ({
   bottom,
   darkMode,
 }: BlockClockFrameProps) => {
+  const topStyle = {
+    ...itemStyle,
+    top: !!bottom ? "-26cqi" : "-22cqi",
+  };
+
+  const middleStyle = {
+    ...itemStyle,
+    top: !!bottom ? "-4cqi" : "0cqi",
+  };
+
+  const lowerMiddleStyle = {
+    ...itemStyle,
+    top: !!bottom ? "11cqi" : "15cqi",
+  };
+
+  const bottomStyle = {
+    ...itemStyle,
+    top: "30cqi",
+  };
+
   return html`
     <div class=${classMap({ dark: darkMode })} style=${styleMap(wrapperStyle)}>
       ${ringTrack} ${ring}
@@ -62,24 +82,4 @@ const itemStyle = {
   height: "100%",
   justifyContent: "center",
   alignItems: "center",
-};
-
-const topStyle = {
-  ...itemStyle,
-  top: "-26cqi",
-};
-
-const middleStyle = {
-  ...itemStyle,
-  top: "-4cqi",
-};
-
-const lowerMiddleStyle = {
-  ...itemStyle,
-  top: "11cqi",
-};
-
-const bottomStyle = {
-  ...itemStyle,
-  top: "30cqi",
 };
