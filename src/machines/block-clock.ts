@@ -9,7 +9,8 @@ import { getTimestamp } from "../utils/time";
 import { clearCachedContext } from "../lib/storage";
 
 const MAX_CONNECT_ERROR_COUNT = 5;
-const POLL_WAIT_TIME = 2000;
+const POLL_WAIT_TIME = 2_000;
+const LONG_POLL_WAIT_TIME = 60_000;
 
 const initialContext = {
   blocks: 0,
@@ -23,6 +24,7 @@ const initialContext = {
   IBDEstimation: 0,
   oneHourIntervals: false,
   connectErrorCount: 0,
+  isLoadingBlockIndex: false,
 };
 
 const fetchBlockchainInfo = fromPromise(async ({ input }: { input: Context }) =>
@@ -68,6 +70,7 @@ export type Context = RpcConfig &
     IBDEstimationArray: { progressTakenAt: number; progress: number }[];
     oneHourIntervals: boolean;
     connectErrorCount: number;
+    isLoadingBlockIndex: boolean;
   };
 
 function addBlockInCorrectPosition(
@@ -190,8 +193,10 @@ export const machine = setup({
       };
     }),
     logError: ({ event }) => {
-      console.error("Block Clock Error: ", event.error);
+      console.error("Block Clock Error: ", event.error.message);
     },
+    setLoadingBlockIndex: assign({ isLoadingBlockIndex: true }),
+    unsetLoadingBlockIndex: assign({ isLoadingBlockIndex: false }),
   },
   actors: {
     fetchBlockchainInfo,
@@ -213,6 +218,9 @@ export const machine = setup({
     },
     isBlockBeforeZeroHour: function ({ context, event }) {
       return event.output.time * 1000 < context.zeroHourTimestamp;
+    },
+    isLoadingBlockIndexError: function ({ event }) {
+      return event.error.code === -28;
     },
     isPointerOnOrBeforeZeroHourBlockHeight: function ({
       context: { pointer, zeroHourBlockHeight },
@@ -265,6 +273,7 @@ export const machine = setup({
               "updateInfo",
               "addToIBDEstimation",
               "resetConnectErrorCount",
+              "unsetLoadingBlockIndex",
             ],
           },
           {
@@ -273,17 +282,24 @@ export const machine = setup({
               "updateInfo",
               "addToIBDEstimation",
               "resetConnectErrorCount",
+              "unsetLoadingBlockIndex",
             ],
           },
         ],
         onError: [
           {
+            target: BlockClockState.ConnectingRetry,
+            guard: "isLoadingBlockIndexError",
+            actions: ["setLoadingBlockIndex"],
+          },
+          {
             target: BlockClockState.ErrorConnecting,
             guard: "hasExceededConnectErrorCount",
+            actions: ["unsetLoadingBlockIndex"],
           },
           {
             target: BlockClockState.ConnectingRetry,
-            actions: ["incrementConnectErrorCount"],
+            actions: ["incrementConnectErrorCount", "unsetLoadingBlockIndex"],
           },
         ],
         src: "fetchBlockchainInfo",
@@ -298,8 +314,12 @@ export const machine = setup({
       },
     },
     [BlockClockState.ErrorConnecting]: {
-      type: "final",
       entry: ["logError"],
+      after: {
+        [LONG_POLL_WAIT_TIME]: {
+          target: BlockClockState.Connecting,
+        },
+      },
     },
     [BlockClockState.WaitingIBD]: {
       initial: "Poll",

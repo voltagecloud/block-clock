@@ -193,6 +193,7 @@ export class Index extends LitElement {
           theme: this.theme,
           darkMode: this.darkMode,
           oneHourIntervals: this.oneHourIntervals,
+          isLoadingBlockIndex: this.blockClockContext.isLoadingBlockIndex,
         })}
       `;
     }

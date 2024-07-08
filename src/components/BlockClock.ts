@@ -22,6 +22,7 @@ export interface BlockClockProps {
   darkMode: boolean;
   theme: BlockClockTheme;
   oneHourIntervals: boolean;
+  isLoadingBlockIndex: boolean;
 }
 
 function getLogoTypeFromStoppedReason(stoppedReason?: StoppedReason) {
@@ -72,8 +73,12 @@ function getClock({
   ringSegments,
   state,
   darkMode,
+  isLoadingBlockIndex,
 }: BlockClockProps) {
-  const _isSyncingHeaders = isSyncingHeaders({ blocks, headers });
+  const _isSyncingHeaders = isSyncingHeaders({
+    blocks,
+    headers,
+  });
   const _isSnapshottingBlocks = isSnapshottingBlocks({
     blocks,
     headers,
@@ -88,72 +93,82 @@ function getClock({
   } else {
     _downloadProgress = downloadProgress;
   }
-  switch (state) {
-    case BlockClockState.Stopped:
-      return BlockClockFrame({
-        ringWidth,
-        top: Logo({ logo: getLogoTypeFromStoppedReason(stoppedReason) }),
-        middle: Title({ text: "Stopped" }),
-        lowerMiddle: Subtitle({ text: stoppedReason }),
-        // bottom: IndicatorInactive(),
-        darkMode,
-      });
-    case BlockClockState.Connecting:
-    case BlockClockState.ConnectingRetry:
-      return BlockClockFrame({
-        ringWidth,
-        top: Logo({ logo: LogoType.Bitcoin }),
-        middle: Title({ text: "Connecting" }),
-        lowerMiddle: Subtitle({ text: "Please Wait" }),
-        // bottom: IndicatorLoading(),
-        darkMode,
-      });
-    case BlockClockState.LoadingBlocks:
-      return BlockClockFrame({
-        ringWidth,
-        top: Logo({ logo: LogoType.Bitcoin }),
-        middle: Title({ text: "Loading Blocks" }),
-        lowerMiddle: Subtitle({ text: "Please Wait" }),
-        // bottom: IndicatorLoading(),
-        darkMode,
-      });
-    case BlockClockState.ErrorConnecting:
-      return BlockClockFrame({
-        ringWidth,
-        top: Logo({ logo: LogoType.Paused }),
-        middle: Title({ text: "Error" }),
-        lowerMiddle: Subtitle({ text: "RPC Connect Fail" }),
-        darkMode,
-      });
-    case BlockClockState.WaitingIBD:
-      return BlockClockFrame({
-        ringWidth,
-        ring: _isSyncingHeaders
-          ? undefined
-          : Ring({ ringFillAngle: _downloadProgress * 100 * 3.6, ringWidth }),
-        top: Logo({ logo: LogoType.Bitcoin }),
-        middle: Title({
-          text: _isSyncingHeaders ? "Syncing" : "Downloading",
-        }),
-        lowerMiddle: Subtitle({
-          text: _isSyncingHeaders
-            ? "Please Wait"
-            : `${roundToDecimalPoints(_downloadProgress * 100, 2)}%`,
-        }),
-        // bottom: IndicatorLoading(),
-        darkMode,
-      });
-    default:
-      return BlockClockFrame({
-        ringWidth,
-        ringTrack: RingTrack({ ringWidth, size: 1, withPoints: true }),
-        ring: RingSegmented({ ringWidth, ringSegments, theme }),
-        top: Logo({ logo: LogoType.Bitcoin }),
-        middle: Title({ text: numberWithCommas(blocks), scale: 1.2 }),
-        lowerMiddle: Subtitle({ text: `Blocktime` }),
-        // bottom: IndicatorPeers(),
-        darkMode,
-      });
+  if (isLoadingBlockIndex) {
+    return BlockClockFrame({
+      ringWidth,
+      top: Logo({ logo: LogoType.Bitcoin }),
+      middle: Title({ text: "Block Index" }),
+      lowerMiddle: Subtitle({ text: "Loading" }),
+      darkMode,
+    });
+  } else {
+    switch (state) {
+      case BlockClockState.Stopped:
+        return BlockClockFrame({
+          ringWidth,
+          top: Logo({ logo: getLogoTypeFromStoppedReason(stoppedReason) }),
+          middle: Title({ text: "Stopped" }),
+          lowerMiddle: Subtitle({ text: stoppedReason }),
+          // bottom: IndicatorInactive(),
+          darkMode,
+        });
+      case BlockClockState.Connecting:
+      case BlockClockState.ConnectingRetry:
+        return BlockClockFrame({
+          ringWidth,
+          top: Logo({ logo: LogoType.Bitcoin }),
+          middle: Title({ text: "Connecting" }),
+          lowerMiddle: Subtitle({ text: "Please Wait" }),
+          // bottom: IndicatorLoading(),
+          darkMode,
+        });
+      case BlockClockState.LoadingBlocks:
+        return BlockClockFrame({
+          ringWidth,
+          top: Logo({ logo: LogoType.Bitcoin }),
+          middle: Title({ text: "Loading Blocks" }),
+          lowerMiddle: Subtitle({ text: "Please Wait" }),
+          // bottom: IndicatorLoading(),
+          darkMode,
+        });
+      case BlockClockState.ErrorConnecting:
+        return BlockClockFrame({
+          ringWidth,
+          top: Logo({ logo: LogoType.Paused }),
+          middle: Title({ text: "Error" }),
+          lowerMiddle: Subtitle({ text: "RPC Connect Fail" }),
+          darkMode,
+        });
+      case BlockClockState.WaitingIBD:
+        return BlockClockFrame({
+          ringWidth,
+          ring: _isSyncingHeaders
+            ? undefined
+            : Ring({ ringFillAngle: _downloadProgress * 100 * 3.6, ringWidth }),
+          top: Logo({ logo: LogoType.Bitcoin }),
+          middle: Title({
+            text: _isSyncingHeaders ? "Syncing" : "Downloading",
+          }),
+          lowerMiddle: Subtitle({
+            text: _isSyncingHeaders
+              ? "Please Wait"
+              : `${roundToDecimalPoints(_downloadProgress * 100, 2)}%`,
+          }),
+          // bottom: IndicatorLoading(),
+          darkMode,
+        });
+      default:
+        return BlockClockFrame({
+          ringWidth,
+          ringTrack: RingTrack({ ringWidth, size: 1, withPoints: true }),
+          ring: RingSegmented({ ringWidth, ringSegments, theme }),
+          top: Logo({ logo: LogoType.Bitcoin }),
+          middle: Title({ text: numberWithCommas(blocks), scale: 1.2 }),
+          lowerMiddle: Subtitle({ text: `Blocktime` }),
+          // bottom: IndicatorPeers(),
+          darkMode,
+        });
+    }
   }
 }
 
