@@ -27,7 +27,7 @@ export class Index extends LitElement {
   @property({ type: Boolean }) darkMode = false;
   @property({ type: Boolean }) devMode = false;
   @property({ type: Boolean }) oneHourIntervals = false;
-  @property({ type: Boolean }) isPaused = false;
+  @property({ type: Boolean }) isStopped = false;
   @property({ type: Object }) theme = DEFAULT_THEME;
 
   // Use these if you want to use a proxy server to connect to the RPC endpoint
@@ -69,7 +69,7 @@ export class Index extends LitElement {
       proxyUrl: this.proxyUrl,
       token: this.token,
       oneHourIntervals: this.oneHourIntervals,
-      isPaused: this.isPaused,
+      isStopped: this.isStopped,
     };
     this.blockClockActor = createActor(blockClockMachine, {
       input: machineInput,
@@ -126,9 +126,15 @@ export class Index extends LitElement {
   protected update(
     _changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>
   ): void {
-    super.update(_changedProperties);
+    super.update(_changedProperties); // _changedProperties logs the previous values, "this" has the current values
     if (_changedProperties.has("token")) {
       this.blockClockActor?.send({ type: "SET_TOKEN", token: this.token });
+    } else if (_changedProperties.has("isStopped")) {
+      if (this.isStopped) {
+        this.blockClockActor?.send({ type: "STOP" });
+      } else {
+        this.blockClockActor?.send({ type: "RESUME" });
+      }
     }
   }
 
@@ -173,6 +179,10 @@ export class Index extends LitElement {
           <b>One Hour Intervals</b>
           ${JSON.stringify(this.oneHourIntervals)}
         </div>
+        <div>
+          <b>Is Stopped</b>
+          ${JSON.stringify(this.isStopped)}
+        </div>
       </div>
     `;
     if (this.blockClockState && this.blockClockContext) {
@@ -190,7 +200,7 @@ export class Index extends LitElement {
           darkMode: this.darkMode,
           oneHourIntervals: this.oneHourIntervals,
           isLoadingBlockIndex: this.blockClockContext.isLoadingBlockIndex,
-          isPaused: this.isPaused,
+          isStopped: this.isStopped,
         })}
       `;
     }

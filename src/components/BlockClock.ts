@@ -22,7 +22,7 @@ export interface BlockClockProps {
   theme: BlockClockTheme;
   oneHourIntervals: boolean;
   isLoadingBlockIndex: boolean;
-  isPaused: boolean;
+  isStopped: boolean;
 }
 
 function isSyncingHeaders({
@@ -87,12 +87,12 @@ function getClock({
     });
   } else {
     switch (state) {
-      case BlockClockState.Paused:
+      case BlockClockState.Stopped:
         return BlockClockFrame({
           ringWidth,
           top: Logo({ logo: LogoType.Paused }),
-          middle: Title({ text: "Paused" }),
-          lowerMiddle: Subtitle({ text: "Node is Paused" }),
+          middle: Title({ text: "Stopped" }),
+          lowerMiddle: Subtitle({ text: "Node is Stopped" }),
           darkMode,
         });
       case BlockClockState.Connecting:

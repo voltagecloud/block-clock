@@ -23,6 +23,7 @@ const initialContext = {
   IBDEstimationArray: [],
   IBDEstimation: 0,
   oneHourIntervals: false,
+  isStopped: false,
   connectErrorCount: 0,
   isLoadingBlockIndex: false,
 };
@@ -52,7 +53,7 @@ export enum BlockClockState {
   WaitingIBD = "WaitingIBD",
   Downloading = "Downloading",
   BlockTime = "BlockTime",
-  Paused = "Paused",
+  Stopped = "Stopped",
 }
 
 export type Context = RpcConfig &
@@ -68,6 +69,7 @@ export type Context = RpcConfig &
     IBDEstimation?: number;
     IBDEstimationArray: { progressTakenAt: number; progress: number }[];
     oneHourIntervals: boolean;
+    isStopped: boolean;
     connectErrorCount: number;
     isLoadingBlockIndex: boolean;
   };
@@ -196,6 +198,8 @@ export const machine = setup({
     },
     setLoadingBlockIndex: assign({ isLoadingBlockIndex: true }),
     unsetLoadingBlockIndex: assign({ isLoadingBlockIndex: false }),
+    stop: assign({ isStopped: true }),
+    resume: assign({ isStopped: false }),
   },
   actors: {
     fetchBlockchainInfo,
@@ -239,15 +243,22 @@ export const machine = setup({
   id: "BlockClock",
   initial: BlockClockState.Connecting,
   on: {
-    RESET: {
-      target: `.${BlockClockState.Connecting}`,
-      actions: ["resetAll", "resetConnectErrorCount"],
-    },
     SET_TOKEN: {
       actions: assign(({ event: { token } }) => ({ token })),
     },
+    STOP: {
+      target: `.${BlockClockState.Stopped}`,
+      actions: "stop",
+    },
+    RESUME: {
+      target: `.${BlockClockState.BlockTime}`,
+      actions: "resume",
+    },
   },
   states: {
+    [BlockClockState.Stopped]: {
+      entry: [],
+    },
     [BlockClockState.Connecting]: {
       always: [
         {

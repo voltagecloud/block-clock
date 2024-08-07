@@ -64,9 +64,9 @@ export const BlockTime: Story = {
   },
 };
 
-export const Paused: Story = {
+export const Stopped: Story = {
   args: {
-    state: BlockClockState.Paused,
+    state: BlockClockState.Stopped,
   },
 };
 
