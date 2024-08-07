@@ -12,12 +12,6 @@ import { DEFAULT_THEME } from "./utils/constants";
 import { calculateRadialTimeDifferences } from "./utils/math";
 import { getCachedContext, updateCachedContext } from "./lib/storage";
 
-declare global {
-  interface Window {
-    emitLitDebugLogEvents: boolean;
-  }
-}
-
 @customElement("block-clock")
 export class Index extends LitElement {
   static styles = unsafeCSS(style);

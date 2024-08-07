@@ -109,7 +109,6 @@ function getClock({
           top: Logo({ logo: getLogoTypeFromStoppedReason(stoppedReason) }),
           middle: Title({ text: "Stopped" }),
           lowerMiddle: Subtitle({ text: stoppedReason }),
-          // bottom: IndicatorInactive(),
           darkMode,
         });
       case BlockClockState.Connecting:
@@ -119,7 +118,6 @@ function getClock({
           top: Logo({ logo: LogoType.Bitcoin }),
           middle: Title({ text: "Connecting" }),
           lowerMiddle: Subtitle({ text: "Please Wait" }),
-          // bottom: IndicatorLoading(),
           darkMode,
         });
       case BlockClockState.LoadingBlocks:
@@ -128,7 +126,6 @@ function getClock({
           top: Logo({ logo: LogoType.Bitcoin }),
           middle: Title({ text: "Loading Blocks" }),
           lowerMiddle: Subtitle({ text: "Please Wait" }),
-          // bottom: IndicatorLoading(),
           darkMode,
         });
       case BlockClockState.ErrorConnecting:
@@ -154,7 +151,6 @@ function getClock({
               ? "Please Wait"
               : `${roundToDecimalPoints(_downloadProgress * 100, 2)}%`,
           }),
-          // bottom: IndicatorLoading(),
           darkMode,
         });
       default:
@@ -165,7 +161,6 @@ function getClock({
           top: Logo({ logo: LogoType.Bitcoin }),
           middle: Title({ text: numberWithCommas(blocks), scale: 1.2 }),
           lowerMiddle: Subtitle({ text: `Blocktime` }),
-          // bottom: IndicatorPeers(),
           darkMode,
         });
     }
