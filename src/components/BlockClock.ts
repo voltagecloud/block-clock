@@ -1,5 +1,5 @@
 import { html } from "lit";
-import { BlockClockTheme, StoppedReason } from "../lib/types.ts";
+import { BlockClockTheme } from "../lib/types.ts";
 import { Logo, LogoType } from "./Logo.ts";
 import { BlockClockFrame } from "./BlockClockFrame.ts";
 import { Title } from "./Title.ts";
@@ -15,7 +15,7 @@ export interface BlockClockProps {
   ringWidth: number;
   downloadProgress: number;
   ibdCompletionEstimate?: number;
-  stoppedReason?: StoppedReason;
+  stoppedReason?: string;
   blocks: number | undefined;
   headers: number | undefined;
   ringSegments: number[];
@@ -23,21 +23,6 @@ export interface BlockClockProps {
   theme: BlockClockTheme;
   oneHourIntervals: boolean;
   isLoadingBlockIndex: boolean;
-}
-
-function getLogoTypeFromStoppedReason(stoppedReason?: StoppedReason) {
-  switch (stoppedReason) {
-    case StoppedReason.ErrorGeneral:
-      return LogoType.Stop;
-    case StoppedReason.ErrorSystemClock:
-      return LogoType.Stop;
-    case StoppedReason.PausedNoWifi:
-      return LogoType.NoWifi;
-    case StoppedReason.PausedManual:
-      return LogoType.Paused;
-    default:
-      return undefined;
-  }
 }
 
 function isSyncingHeaders({
@@ -106,7 +91,7 @@ function getClock({
       case BlockClockState.Stopped:
         return BlockClockFrame({
           ringWidth,
-          top: Logo({ logo: getLogoTypeFromStoppedReason(stoppedReason) }),
+          top: Logo({ logo: LogoType.Paused }),
           middle: Title({ text: "Stopped" }),
           lowerMiddle: Subtitle({ text: stoppedReason }),
           darkMode,
