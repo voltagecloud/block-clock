@@ -54,6 +54,7 @@ export enum BlockClockState {
   Downloading = "Downloading",
   BlockTime = "BlockTime",
   Stopped = "Stopped",
+  Initial = "Initial",
 }
 
 export type Context = RpcConfig &
@@ -234,6 +235,7 @@ export const machine = setup({
         return pointer <= zeroHourBlockHeight;
       }
     },
+    isStopped: ({ context }) => context.isStopped,
   },
 }).createMachine({
   context: ({ input }) => ({
@@ -241,7 +243,7 @@ export const machine = setup({
     ...input,
   }),
   id: "BlockClock",
-  initial: BlockClockState.Connecting,
+  initial: BlockClockState.Initial,
   on: {
     SET_TOKEN: {
       actions: assign(({ event: { token } }) => ({ token })),
@@ -256,6 +258,17 @@ export const machine = setup({
     },
   },
   states: {
+    [BlockClockState.Initial]: {
+      always: [
+        {
+          target: BlockClockState.Stopped,
+          guard: "isStopped",
+        },
+        {
+          target: BlockClockState.Connecting,
+        },
+      ],
+    },
     [BlockClockState.Stopped]: {
       entry: [],
     },
