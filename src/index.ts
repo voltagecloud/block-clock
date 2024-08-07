@@ -27,6 +27,7 @@ export class Index extends LitElement {
   @property({ type: Boolean }) darkMode = false;
   @property({ type: Boolean }) devMode = false;
   @property({ type: Boolean }) oneHourIntervals = false;
+  @property({ type: Boolean }) isPaused = false;
   @property({ type: Object }) theme = DEFAULT_THEME;
 
   // Use these if you want to use a proxy server to connect to the RPC endpoint
@@ -68,6 +69,7 @@ export class Index extends LitElement {
       proxyUrl: this.proxyUrl,
       token: this.token,
       oneHourIntervals: this.oneHourIntervals,
+      isPaused: this.isPaused,
     };
     this.blockClockActor = createActor(blockClockMachine, {
       input: machineInput,
@@ -188,6 +190,7 @@ export class Index extends LitElement {
           darkMode: this.darkMode,
           oneHourIntervals: this.oneHourIntervals,
           isLoadingBlockIndex: this.blockClockContext.isLoadingBlockIndex,
+          isPaused: this.isPaused,
         })}
       `;
     }

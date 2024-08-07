@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from "@storybook/web-components";
 import { BlockClock, type BlockClockProps } from "../components/BlockClock";
 import { html } from "lit";
 import { DEFAULT_THEME } from "../utils/constants";
-import { StoppedReason } from "../lib/types";
 import { BlockClockState } from "../machines/block-clock";
 
 const getBlockClockDemo = (args: BlockClockProps) =>
@@ -24,20 +23,15 @@ const meta = {
       control: "select",
       options: Object.values(BlockClockState),
     },
-    stoppedReason: {
-      control: "select",
-      options: Object.values(StoppedReason),
-    },
   },
   args: {
-    state: BlockClockState.Ready,
+    state: BlockClockState.BlockTime,
     blocks: 840_000,
     darkMode: true,
     downloadProgress: 0,
     ringSegments: [5, 13, 21, 18, 10, 8, 5, 3, 2, 1],
     ringWidth: 2,
     theme: DEFAULT_THEME,
-    stoppedReason: undefined,
   },
 } satisfies Meta<BlockClockProps>;
 
@@ -70,9 +64,8 @@ export const BlockTime: Story = {
   },
 };
 
-export const Stopped: Story = {
+export const Paused: Story = {
   args: {
-    state: BlockClockState.Stopped,
-    stoppedReason: StoppedReason.PausedManual,
+    state: BlockClockState.Paused,
   },
 };

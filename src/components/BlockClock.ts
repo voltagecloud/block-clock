@@ -15,7 +15,6 @@ export interface BlockClockProps {
   ringWidth: number;
   downloadProgress: number;
   ibdCompletionEstimate?: number;
-  stoppedReason?: string;
   blocks: number | undefined;
   headers: number | undefined;
   ringSegments: number[];
@@ -23,6 +22,7 @@ export interface BlockClockProps {
   theme: BlockClockTheme;
   oneHourIntervals: boolean;
   isLoadingBlockIndex: boolean;
+  isPaused: boolean;
 }
 
 function isSyncingHeaders({
@@ -49,7 +49,6 @@ function isSnapshottingBlocks({
 }
 
 function getClock({
-  stoppedReason,
   ringWidth,
   theme,
   downloadProgress,
@@ -88,12 +87,12 @@ function getClock({
     });
   } else {
     switch (state) {
-      case BlockClockState.Stopped:
+      case BlockClockState.Paused:
         return BlockClockFrame({
           ringWidth,
           top: Logo({ logo: LogoType.Paused }),
-          middle: Title({ text: "Stopped" }),
-          lowerMiddle: Subtitle({ text: stoppedReason }),
+          middle: Title({ text: "Paused" }),
+          lowerMiddle: Subtitle({ text: "Node is Paused" }),
           darkMode,
         });
       case BlockClockState.Connecting:
@@ -102,14 +101,6 @@ function getClock({
           ringWidth,
           top: Logo({ logo: LogoType.Bitcoin }),
           middle: Title({ text: "Connecting" }),
-          lowerMiddle: Subtitle({ text: "Please Wait" }),
-          darkMode,
-        });
-      case BlockClockState.LoadingBlocks:
-        return BlockClockFrame({
-          ringWidth,
-          top: Logo({ logo: LogoType.Bitcoin }),
-          middle: Title({ text: "Loading Blocks" }),
           lowerMiddle: Subtitle({ text: "Please Wait" }),
           darkMode,
         });

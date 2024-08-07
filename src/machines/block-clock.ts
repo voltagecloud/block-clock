@@ -52,8 +52,7 @@ export enum BlockClockState {
   WaitingIBD = "WaitingIBD",
   Downloading = "Downloading",
   BlockTime = "BlockTime",
-  Stopped = "Stopped",
-  LoadingBlocks = "LoadingBlocks",
+  Paused = "Paused",
 }
 
 export type Context = RpcConfig &
