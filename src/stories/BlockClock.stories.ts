@@ -69,3 +69,9 @@ export const Paused: Story = {
     state: BlockClockState.Paused,
   },
 };
+
+export const Error: Story = {
+  args: {
+    state: BlockClockState.ErrorConnecting,
+  },
+};
