@@ -269,9 +269,7 @@ export const machine = setup({
         },
       ],
     },
-    [BlockClockState.Stopped]: {
-      entry: [],
-    },
+    [BlockClockState.Stopped]: {},
     [BlockClockState.Connecting]: {
       always: [
         {
