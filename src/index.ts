@@ -84,11 +84,6 @@ export class Index extends LitElement {
         };
       }
       this.snapshot = snapshot;
-      window.loadDataIntoStorage = (obj: any) => {
-        localStorage.clear();
-        updateCachedContext(obj);
-        location.reload();
-      };
       this.blockClockState = this.getBlockClockState(snapshot);
       this.blockClockContext = snapshot.context;
       // Update the cache only if the context has changed
