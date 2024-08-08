@@ -15,7 +15,7 @@ html,
 :root {
   --title-text-color: #333;
   --subtitle-text-color: #666;
-  --bg-color: white;
+  --bg-color: transparent;
   --ring-track-color: #eee;
   --ring-point-color: #aaa;
 }
@@ -24,7 +24,7 @@ html,
 :root .dark {
   --title-text-color: white;
   --subtitle-text-color: #808080;
-  --bg-color: black;
+  --bg-color: transparent;
   --ring-track-color: #333;
   --ring-point-color: #999;
 }
