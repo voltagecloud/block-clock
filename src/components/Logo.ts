@@ -45,7 +45,7 @@ function getLogo(logo: LogoType) {
           width="18"
           height="18"
           rx="4"
-          stroke="currentColor"
+          style="${styleMap(styles.svgStroke)}"
           stroke-width="1.5"
         />
       </svg>`;
@@ -59,7 +59,7 @@ function getLogo(logo: LogoType) {
           viewBox="0 0 16 16"
         >
           <path
-            stroke="currentColor"
+            style="${styleMap(styles.svgStroke)}"
             stroke-linecap="round"
             stroke-linejoin="round"
             stroke-width="1.5"
