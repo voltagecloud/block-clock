@@ -58,6 +58,6 @@ function getBlockConfirmationColor(theme: BlockClockTheme, index: number) {
   return (
     theme.colors.blockConfirmationColors[index] ||
     theme.colors.blockConfirmationColors.at(-1) || // Fallback to last color
-    "yellow" // or our default theme
+    "#eed349" // or our default theme
   );
 }
