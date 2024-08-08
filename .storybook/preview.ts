@@ -8,7 +8,7 @@ const preview: Preview = {
       values: [
         {
           name: "dark",
-          value: "black",
+          value: "#2d2d39",
         },
         {
           name: "light",

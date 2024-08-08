@@ -12,7 +12,7 @@ export const RingSegment = ({
   startAngle,
   endAngle,
   ringWidth,
-  color = "yellow",
+  color = "#eed349",
 }: RingSegmentProps) => {
   const radius = 50 - ringWidth / 2;
   const circumference = 2 * Math.PI * radius;

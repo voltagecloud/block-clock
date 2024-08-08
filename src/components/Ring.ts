@@ -29,7 +29,7 @@ export const Ring = ({ ringFillAngle = 0, ringWidth }: RingProps) => {
             0 a ${50 - ringWidth / 2},
             ${50 - ringWidth / 2} 0 1,1 -${2 * (50 - ringWidth / 2)},
             0"
-        stroke="yellow"
+        stroke="#eed349"
         stroke-width="${ringWidth}"
         stroke-linecap="round"
         fill="none"
