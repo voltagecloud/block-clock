@@ -1,5 +1,5 @@
 import { html } from "lit";
-import { BlockClockTheme, StoppedReason } from "../lib/types.ts";
+import { BlockClockTheme } from "../lib/types.ts";
 import { Logo, LogoType } from "./Logo.ts";
 import { BlockClockFrame } from "./BlockClockFrame.ts";
 import { Title } from "./Title.ts";
@@ -15,7 +15,6 @@ export interface BlockClockProps {
   ringWidth: number;
   downloadProgress: number;
   ibdCompletionEstimate?: number;
-  stoppedReason?: StoppedReason;
   blocks: number | undefined;
   headers: number | undefined;
   ringSegments: number[];
@@ -23,21 +22,7 @@ export interface BlockClockProps {
   theme: BlockClockTheme;
   oneHourIntervals: boolean;
   isLoadingBlockIndex: boolean;
-}
-
-function getLogoTypeFromStoppedReason(stoppedReason?: StoppedReason) {
-  switch (stoppedReason) {
-    case StoppedReason.ErrorGeneral:
-      return LogoType.Stop;
-    case StoppedReason.ErrorSystemClock:
-      return LogoType.Stop;
-    case StoppedReason.PausedNoWifi:
-      return LogoType.NoWifi;
-    case StoppedReason.PausedManual:
-      return LogoType.Paused;
-    default:
-      return undefined;
-  }
+  isStopped: boolean;
 }
 
 function isSyncingHeaders({
@@ -64,7 +49,6 @@ function isSnapshottingBlocks({
 }
 
 function getClock({
-  stoppedReason,
   ringWidth,
   theme,
   downloadProgress,
@@ -106,10 +90,9 @@ function getClock({
       case BlockClockState.Stopped:
         return BlockClockFrame({
           ringWidth,
-          top: Logo({ logo: getLogoTypeFromStoppedReason(stoppedReason) }),
+          top: Logo({ logo: LogoType.Paused }),
           middle: Title({ text: "Stopped" }),
-          lowerMiddle: Subtitle({ text: stoppedReason }),
-          // bottom: IndicatorInactive(),
+          lowerMiddle: Subtitle({ text: "Node is Stopped" }),
           darkMode,
         });
       case BlockClockState.Connecting:
@@ -119,16 +102,6 @@ function getClock({
           top: Logo({ logo: LogoType.Bitcoin }),
           middle: Title({ text: "Connecting" }),
           lowerMiddle: Subtitle({ text: "Please Wait" }),
-          // bottom: IndicatorLoading(),
-          darkMode,
-        });
-      case BlockClockState.LoadingBlocks:
-        return BlockClockFrame({
-          ringWidth,
-          top: Logo({ logo: LogoType.Bitcoin }),
-          middle: Title({ text: "Loading Blocks" }),
-          lowerMiddle: Subtitle({ text: "Please Wait" }),
-          // bottom: IndicatorLoading(),
           darkMode,
         });
       case BlockClockState.ErrorConnecting:
@@ -154,7 +127,6 @@ function getClock({
               ? "Please Wait"
               : `${roundToDecimalPoints(_downloadProgress * 100, 2)}%`,
           }),
-          // bottom: IndicatorLoading(),
           darkMode,
         });
       default:
@@ -165,7 +137,6 @@ function getClock({
           top: Logo({ logo: LogoType.Bitcoin }),
           middle: Title({ text: numberWithCommas(blocks), scale: 1.2 }),
           lowerMiddle: Subtitle({ text: `Blocktime` }),
-          // bottom: IndicatorPeers(),
           darkMode,
         });
     }

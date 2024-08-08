@@ -52,7 +52,7 @@ export async function proxyFetch<T>({
     throw new Error(result.statusText || `${method} 😱 ${result.status}`);
   }
   const data = await result.json().catch();
-  if (data.response.hasOwnProperty("code")) {
+  if (data.response?.hasOwnProperty("code")) {
     throw data.response;
   }
   return data.response as T;
@@ -89,7 +89,7 @@ export async function rpcFetch<T>({
     throw new Error(result.statusText || `${method} 😱 ${result.status}`);
   }
   const data = await result.json().catch();
-  if (data.response.hasOwnProperty("code")) {
+  if (data.response?.hasOwnProperty("code")) {
     throw data.response;
   }
   return data.result as T;

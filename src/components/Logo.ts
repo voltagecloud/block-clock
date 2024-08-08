@@ -1,14 +1,9 @@
 import { html } from "lit";
 import { styleMap } from "lit/directives/style-map.js";
 
-// TODO: allow custom logos
 export enum LogoType {
   Bitcoin = "bitcon",
-  NoWifi = "nowifi",
-  Battery = "battery",
   Paused = "paused",
-  Clock = "clock",
-  Stop = "stop",
 }
 
 interface LogoProps {

@@ -23,6 +23,7 @@ const initialContext = {
   IBDEstimationArray: [],
   IBDEstimation: 0,
   oneHourIntervals: false,
+  isStopped: false,
   connectErrorCount: 0,
   isLoadingBlockIndex: false,
 };
@@ -53,7 +54,7 @@ export enum BlockClockState {
   Downloading = "Downloading",
   BlockTime = "BlockTime",
   Stopped = "Stopped",
-  LoadingBlocks = "LoadingBlocks",
+  Initial = "Initial",
 }
 
 export type Context = RpcConfig &
@@ -69,6 +70,7 @@ export type Context = RpcConfig &
     IBDEstimation?: number;
     IBDEstimationArray: { progressTakenAt: number; progress: number }[];
     oneHourIntervals: boolean;
+    isStopped: boolean;
     connectErrorCount: number;
     isLoadingBlockIndex: boolean;
   };
@@ -197,6 +199,8 @@ export const machine = setup({
     },
     setLoadingBlockIndex: assign({ isLoadingBlockIndex: true }),
     unsetLoadingBlockIndex: assign({ isLoadingBlockIndex: false }),
+    stop: assign({ isStopped: true }),
+    resume: assign({ isStopped: false }),
   },
   actors: {
     fetchBlockchainInfo,
@@ -231,6 +235,7 @@ export const machine = setup({
         return pointer <= zeroHourBlockHeight;
       }
     },
+    isStopped: ({ context }) => context.isStopped,
   },
 }).createMachine({
   context: ({ input }) => ({
@@ -238,17 +243,33 @@ export const machine = setup({
     ...input,
   }),
   id: "BlockClock",
-  initial: BlockClockState.Connecting,
+  initial: BlockClockState.Initial,
   on: {
-    RESET: {
-      target: `.${BlockClockState.Connecting}`,
-      actions: ["resetAll", "resetConnectErrorCount"],
-    },
     SET_TOKEN: {
       actions: assign(({ event: { token } }) => ({ token })),
     },
+    STOP: {
+      target: `.${BlockClockState.Stopped}`,
+      actions: "stop",
+    },
+    RESUME: {
+      target: `.${BlockClockState.BlockTime}`,
+      actions: "resume",
+    },
   },
   states: {
+    [BlockClockState.Initial]: {
+      always: [
+        {
+          target: BlockClockState.Stopped,
+          guard: "isStopped",
+        },
+        {
+          target: BlockClockState.Connecting,
+        },
+      ],
+    },
+    [BlockClockState.Stopped]: {},
     [BlockClockState.Connecting]: {
       always: [
         {
