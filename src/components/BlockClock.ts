@@ -90,9 +90,9 @@ function getClock({
       case BlockClockState.Stopped:
         return BlockClockFrame({
           ringWidth,
-          top: Logo({ logo: LogoType.Paused }),
+          top: Logo({ logo: LogoType.Stopped }),
           middle: Title({ text: "Stopped" }),
-          lowerMiddle: Subtitle({ text: "Node is Stopped" }),
+          lowerMiddle: Subtitle({ text: "Node is Offline" }),
           darkMode,
         });
       case BlockClockState.Connecting:
@@ -107,7 +107,7 @@ function getClock({
       case BlockClockState.ErrorConnecting:
         return BlockClockFrame({
           ringWidth,
-          top: Logo({ logo: LogoType.Paused }),
+          top: Logo({ logo: LogoType.Error }),
           middle: Title({ text: "Error" }),
           lowerMiddle: Subtitle({ text: "RPC Connect Fail" }),
           darkMode,
