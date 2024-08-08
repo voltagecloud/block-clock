@@ -3,7 +3,8 @@ import { styleMap } from "lit/directives/style-map.js";
 
 export enum LogoType {
   Bitcoin = "bitcon",
-  Paused = "paused",
+  Stopped = "stopped",
+  Error = "error",
 }
 
 interface LogoProps {
@@ -30,38 +31,39 @@ function getLogo(logo: LogoType) {
           />
         </svg>
       `;
-    case LogoType.Paused:
+    case LogoType.Stopped:
+      return html` <svg
+        width="100%"
+        height="100%"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <rect
+          x="3"
+          y="3"
+          width="18"
+          height="18"
+          rx="4"
+          stroke="currentColor"
+          stroke-width="1.5"
+        />
+      </svg>`;
+    case LogoType.Error:
       return html`
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="100%"
           height="100%"
-          viewBox="0 0 30 30"
           fill="none"
-          style="${styleMap(styles.svg)}"
+          viewBox="0 0 16 16"
         >
-          <circle
-            cx="15"
-            cy="15"
-            r="14.25"
+          <path
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
             stroke-width="1.5"
-            style="${styleMap(styles.svgStroke)}"
-          />
-          <rect
-            x="9"
-            y="17"
-            width="12"
-            height="3"
-            rx="0.5"
-            style="${styleMap(styles.svgFill)}"
-          />
-          <rect
-            x="9"
-            y="10"
-            width="12"
-            height="3"
-            rx="0.5"
-            style="${styleMap(styles.svgFill)}"
+            d="M8 5.39v2.86m-6.052 2.775a1.463 1.463 0 0 0 1.267 2.195h9.57c1.125 0 1.83-1.22 1.267-2.195L9.268 2.732a1.464 1.464 0 0 0-2.536 0l-4.784 8.293ZM8 10.78h.005v.006H8v-.006Z"
           />
         </svg>
       `;

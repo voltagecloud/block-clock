@@ -252,10 +252,6 @@ export const machine = setup({
       target: `.${BlockClockState.Stopped}`,
       actions: "stop",
     },
-    RESUME: {
-      target: `.${BlockClockState.BlockTime}`,
-      actions: "resume",
-    },
   },
   states: {
     [BlockClockState.Initial]: {
@@ -269,7 +265,14 @@ export const machine = setup({
         },
       ],
     },
-    [BlockClockState.Stopped]: {},
+    [BlockClockState.Stopped]: {
+      on: {
+        RESUME: {
+          target: BlockClockState.Connecting,
+          actions: "resume",
+        },
+      },
+    },
     [BlockClockState.Connecting]: {
       always: [
         {
