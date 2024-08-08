@@ -23,10 +23,10 @@ html,
 :host .dark,
 :root .dark {
   --title-text-color: white;
-  --subtitle-text-color: #808080;
+  --subtitle-text-color: #aaa;
   --bg-color: transparent;
-  --ring-track-color: #333;
-  --ring-point-color: #999;
+  --ring-track-color: #111;
+  --ring-point-color: #888;
 }
 
 /** Animations */
