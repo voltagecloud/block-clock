@@ -47,7 +47,7 @@ export const RingLoader = ({
     }
   `;
 
-  const themeColor = theme.colors.blockConfirmationColors?.at(-1) || "yellow";
+  const themeColor = theme.colors.blockConfirmationColors?.at(-1) || "#eed349";
 
   return html`
     <style>
