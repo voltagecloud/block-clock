@@ -75,7 +75,7 @@ npm install block-clock
 
 Watch our meeting with [Bitcoin Design Community](https://bitcoin.design/) for an explanation:
 
-[![Watch the video](https://img.youtube.com/watch?v=igKZ-IPlADY/hqdefault.jpg)](https://www.youtube.com/watch?v=igKZ-IPlADY)
+[![Watch the video](https://img.youtube.com/vi/igKZ-IPlADY/hqdefault.jpg)](https://www.youtube.com/embed/igKZ-IPlADY)
 
 `block-clock` is a working [web component](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) implementation of the [Block Clock](https://bitcoincore.app/block-clock/) designed by the Bitcoin Design Community for the [work-in-progress Bitcoin Core App design](https://bitcoincore.app/). The goal of that project is to provide a more intuitive and visually appealing frontend for Bitcoin Core nodes, and `block-clock` is a part of that effort.
 
