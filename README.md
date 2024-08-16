@@ -73,7 +73,11 @@ npm install block-clock
 
 ## How it Works
 
-`block-clock` is a working [web component](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) implementation of the [Block Clock](https://bitcoincore.app/block-clock/) designed by the [Bitcoin Design Community](https://bitcoin.design/) for the [work-in-progress Bitcoin Core App design](https://bitcoincore.app/). The goal of that project is to provide a more intuitive and visually appealing frontend for Bitcoin Core nodes, and `block-clock` is a part of that effort.
+Watch our meeting with [Bitcoin Design Community](https://bitcoin.design/) for an explanation:
+
+[![Watch the video](https://img.youtube.com/watch?v=igKZ-IPlADY/hqdefault.jpg)](https://www.youtube.com/watch?v=igKZ-IPlADY)
+
+`block-clock` is a working [web component](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) implementation of the [Block Clock](https://bitcoincore.app/block-clock/) designed by the Bitcoin Design Community for the [work-in-progress Bitcoin Core App design](https://bitcoincore.app/). The goal of that project is to provide a more intuitive and visually appealing frontend for Bitcoin Core nodes, and `block-clock` is a part of that effort.
 
 The `block-clock` works by consuming a set of Bitcoin Core RPC credentials at an endpoint and a set of (optional) props. It can also accept a callback for Bitcoin Core nodes behind a proxy, so long as the response data returned by the proxy matches response returned by Bitcoin Core. Using these, it fetches block data and calculates the time between block confirmations to create a visual display of when each block was mined.
 
